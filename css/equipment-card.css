@@ -67,7 +67,10 @@
   display: inline-flex;
 }
 
-.die-slot--max {
+.die-slot--max,
+.die-slot--min,
+.die-slot--even,
+.die-slot--odd {
   /* Matches the wiki card art: the hash fill alternates between the card's own
      body and accent colors, not a plain white overlay. */
   background-image: repeating-linear-gradient(
@@ -98,10 +101,24 @@
   line-height: 1;
 }
 
-/* A "Countdown N" requirement charges itself over turns rather than taking a die value */
+/* EVEN/ODD have no value underneath, and the card art prints the label larger and unbolded */
+.die-slot--even .die-slot__label,
+.die-slot--odd .die-slot__label {
+  font-size: 0.72em;
+  font-weight: 400;
+  letter-spacing: 0;
+  opacity: 1;
+}
+
+/* A "Countdown N" requirement charges itself over turns rather than taking a die value. The
+   card art draws it as a solid box: accent-colored border, its own darker fill, a big number. */
 .die-slot--countdown {
-  border-style: solid;
-  background: var(--card-accent, #666);
+  border: 2px solid var(--card-accent, #666);
+  background: var(--card-slot, var(--card-body, #333));
+}
+
+.die-slot--countdown .die-slot__value {
+  font-size: 1.6em;
 }
 
 /* ---------- Die-face: a solid die showing pips, for a fixed number rendered as a real die ---------- */
@@ -142,4 +159,30 @@
   fill: currentColor;
   display: inline-block;
   vertical-align: middle;
+}
+
+/* Status icons, and the fixed number printed right after one, are tinted in the card art
+   (pixel-sampled from the wiki's card images) in a per-status color that differs from the card's
+   own accent (e.g. green thorns on the green Rosewood Spear card are much brighter than its
+   accent). Damage (sword) stays white. */
+.glyph--fire,
+.effect-value--fire {
+  color: #fd5e6c;
+}
+
+.glyph--shield,
+.effect-value--shield,
+.glyph--weaken,
+.effect-value--weaken {
+  color: #f7a06f;
+}
+
+.glyph--thorns,
+.effect-value--thorns {
+  color: #98ea40;
+}
+
+.glyph--poison,
+.effect-value--poison {
+  color: #bda0f4;
 }

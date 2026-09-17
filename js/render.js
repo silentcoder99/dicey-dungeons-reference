@@ -23,20 +23,25 @@ const PIP_POSITION_PERCENT = { 1: 22, 2: 50, 3: 78 };
 // Purely symbolic pip count for the "these are dice" icon in the enemy header.
 const GENERIC_DICE_ICON_PIPS = 3;
 
+const REQUIREMENT_LABELS = { max: "MAX", min: "MIN", even: "EVEN", odd: "ODD" };
+
 function createDieSlot(requirement, { mini = false } = {}) {
   const el = document.createElement("div");
   const classes = ["die-slot"];
   if (mini) classes.push("die-slot--mini");
 
-  if (requirement && requirement.type === "max") {
-    classes.push("die-slot--max");
+  if (requirement && REQUIREMENT_LABELS[requirement.type]) {
+    classes.push(`die-slot--${requirement.type}`);
     const label = document.createElement("span");
     label.className = "die-slot__label";
-    label.textContent = "MAX";
-    const value = document.createElement("span");
-    value.className = "die-slot__value";
-    value.textContent = requirement.value;
-    el.append(label, value);
+    label.textContent = REQUIREMENT_LABELS[requirement.type];
+    el.append(label);
+    if (requirement.value !== undefined) {
+      const value = document.createElement("span");
+      value.className = "die-slot__value";
+      value.textContent = requirement.value;
+      el.append(value);
+    }
   } else if (requirement && requirement.type === "countdown") {
     classes.push("die-slot--countdown");
     const value = document.createElement("span");
@@ -66,7 +71,7 @@ function createDieFace(pips, { mini = false } = {}) {
 
 function createGlyph(iconName) {
   const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("class", "glyph");
+  svg.setAttribute("class", `glyph glyph--${iconName}`);
   svg.setAttribute("aria-hidden", "true");
   const use = document.createElementNS(SVG_NS, "use");
   use.setAttributeNS(XLINK_NS, "xlink:href", `#icon-${iconName}`);
@@ -84,9 +89,18 @@ function renderEffectTokens(tokens) {
         break;
       case "icon":
         frag.appendChild(createGlyph(token.icon));
+        if (token.value !== undefined) {
+          const value = document.createElement("span");
+          value.className = `effect-value effect-value--${token.icon}`;
+          value.textContent = token.value;
+          frag.appendChild(value);
+        }
         break;
       case "dieSlot":
         frag.appendChild(createDieSlot(null, { mini: true }));
+        break;
+      case "lineBreak":
+        frag.appendChild(document.createElement("br"));
         break;
     }
   }
@@ -100,6 +114,7 @@ function renderEquipmentCard(equipmentId) {
   card.className = "equipment-card";
   card.style.setProperty("--card-accent", data.color.header);
   card.style.setProperty("--card-body", data.color.body);
+  if (data.color.slot) card.style.setProperty("--card-slot", data.color.slot);
 
   const header = document.createElement("header");
   header.className = "equipment-card__header";
@@ -201,4 +216,20 @@ function renderEnemyPage(enemyId) {
   root.appendChild(section);
 }
 
-document.addEventListener("DOMContentLoaded", () => renderEnemyPage("frog"));
+// Links are relative to the picker page (index.html at the repo root).
+function renderEnemyPicker() {
+  const root = document.getElementById("picker-root");
+
+  const list = document.createElement("ul");
+  list.className = "enemy-picker";
+  for (const [enemyId, enemy] of Object.entries(ENEMIES)) {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.className = "enemy-picker__card";
+    link.href = `enemies/${enemyId}.html`;
+    link.textContent = enemy.name;
+    item.appendChild(link);
+    list.appendChild(item);
+  }
+  root.appendChild(list);
+}
