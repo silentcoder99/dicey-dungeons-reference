@@ -11,9 +11,9 @@ No build step, no framework, no external requests — open any `.html` page dire
 Visuals (card shapes, colors, die-slot/die-face icons) are hand-built with CSS/SVG to match the
 game's own conventions. No game assets (sprites, card art) are embedded, since those are
 copyrighted; only the layout and color conventions are recreated. Card colors in `js/data.js`
-were pixel-sampled from the official wiki's card images (not eyeballed), and the die-slot/
-die-face visuals were checked against a real rendered page (via a headless-browser screenshot)
-rather than assumed to look right from the CSS alone — see "Verifying changes" below.
+were pixel-sampled from the official wiki's card images (not eyeballed). The site itself still has
+no build step, but there is an automated test suite (Playwright) that renders the pages in a real
+browser and checks both content/structure and visual appearance — see "Tests" below.
 
 ## Pages
 
@@ -62,15 +62,43 @@ once the die face is only a few pixels across (e.g. the mini header icon), produ
 were visibly non-circular and unevenly spaced. Percentage positioning on a square element is
 exact at any size.
 
-## Verifying changes
+## Tests
 
-There's no automated test suite, but two lightweight, throwaway checks are worth re-running after
-editing `render.js`/`data.js`/the CSS (install into a scratch directory, not this repo):
+Automated tests (Playwright) live in `tests/`. They render the real pages in a real headless
+browser rather than relying on CSS looking right on paper — that's what caught the pip-rounding
+and low-contrast issues fixed in this project's history.
 
-- **Functional DOM check**: load `frog.html`'s scripts into `jsdom` and assert on the rendered
-  structure (card count, slot/die-face composition, text content). Catches logic regressions
-  without needing a browser.
-- **Visual check**: install `playwright` + a headless Chromium (`npx playwright install chromium`,
-  plus `npx playwright install-deps chromium` for the OS libraries it needs) and screenshot
-  `frog.html` at a mobile and a desktop viewport. Catches things a DOM check can't, like the
-  pip-rounding and low-contrast issues fixed above — actually rendering it is what surfaced them.
+```bash
+npm install
+npx playwright install --with-deps chromium   # one-time; downloads the browser + OS libraries
+npm test
+```
+
+Three kinds of test, all under `tests/`:
+
+- **`unit.spec.js`** — calls the pure DOM-building functions from `js/render.js` directly (e.g.
+  `createDieSlot`, `createDieFace`, `renderEffectTokens`) via `page.evaluate` and asserts on the
+  DOM they produce. Fastest, most targeted; runs once (`functional` project).
+- **`page.spec.js`** — loads `frog.html` for real and asserts on the rendered content and
+  structure (enemy stats, card count, slot/die-face composition, effect text), plus checks there
+  are no console errors and no non-`file://` network requests (nothing hotlinked from the wiki).
+  Also runs once.
+- **`visual.spec.js`** — pixel snapshot tests (`toHaveScreenshot`) of the full page and of
+  individual components (each card, the die-face pip rendering, the header's dice icon).
+  Component-level close-ups exist because a full-page diff can average a small regression below
+  the diff threshold; a tight crop on just that element can't hide it. This one runs twice, once
+  per viewport project (`visual-mobile` using a Pixel 5 profile, `visual-desktop` at 1200×900) —
+  see `playwright.config.js`.
+
+Baseline snapshots are committed under `tests/visual.spec.js-snapshots/`. When a change
+intentionally alters appearance, review the diff Playwright reports, then regenerate baselines
+with:
+
+```bash
+npm run test:update-snapshots
+```
+
+Snapshot filenames encode the OS they were generated on (currently `linux`). Regenerating them on
+a different platform will produce differently-named baselines rather than overwrite the existing
+ones — keep snapshot generation on one consistent platform (or add CI that runs on that platform)
+to avoid baseline drift.
