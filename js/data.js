@@ -5,6 +5,9 @@
 // Equipment `color`: { header, body } hex values pixel-sampled from the wiki's card image, plus
 // an optional `slot` fill color for cards whose die-slot is a solid countdown box.
 //
+// Equipment `size`: inventory footprint, 1 or 2. Also sets the card's shape: size 1 is a wide
+// card, size 2 a tall one (same width), as in the card art.
+//
 // Equipment `requirement`:
 //   null                            -> no requirement, die-slot renders empty
 //   { type: "max", value: N }       -> die-slot renders hashed with "MAX N"

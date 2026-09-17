@@ -5,10 +5,11 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const XLINK_NS = "http://www.w3.org/1999/xlink";
 
 // Standard 6-sided die pip layouts, as [row, column] positions on a 3x3 grid (1-indexed).
+// 2 and 3 run along the top-right/bottom-left diagonal, as on the wiki's card art.
 const DIE_PIP_LAYOUTS = {
   1: [[2, 2]],
-  2: [[1, 1], [3, 3]],
-  3: [[1, 1], [2, 2], [3, 3]],
+  2: [[1, 3], [3, 1]],
+  3: [[1, 3], [2, 2], [3, 1]],
   4: [[1, 1], [1, 3], [3, 1], [3, 3]],
   5: [[1, 1], [1, 3], [2, 2], [3, 1], [3, 3]],
   6: [[1, 1], [2, 1], [3, 1], [1, 3], [2, 3], [3, 3]],
@@ -17,8 +18,10 @@ const DIE_PIP_LAYOUTS = {
 // Row/column 1-3 -> percentage position within the die face. Pips are placed by percentage
 // (not a CSS grid cell) so they stay perfectly circular and evenly spaced at any size --
 // grid-track + aspect-ratio sizing rounds unpredictably once the die face is only a few
-// pixels across (e.g. the mini header icon).
-const PIP_POSITION_PERCENT = { 1: 22, 2: 50, 3: 78 };
+// pixels across (e.g. the mini header icon). Card die-faces use the wiki art's measured pip
+// centres; the mini header icon keeps its own slightly inset layout, which suits its larger pips.
+const PIP_POSITION_PERCENT = { 1: 16.5, 2: 50, 3: 83.5 };
+const MINI_PIP_POSITION_PERCENT = { 1: 22, 2: 50, 3: 78 };
 
 // Purely symbolic pip count for the "these are dice" icon in the enemy header.
 const GENERIC_DICE_ICON_PIPS = 3;
@@ -59,11 +62,12 @@ function createDieFace(pips, { mini = false } = {}) {
   const el = document.createElement("div");
   el.className = mini ? "die-face die-face--mini" : "die-face";
   el.setAttribute("aria-hidden", "true");
+  const positions = mini ? MINI_PIP_POSITION_PERCENT : PIP_POSITION_PERCENT;
   for (const [row, col] of DIE_PIP_LAYOUTS[pips] || []) {
     const pip = document.createElement("span");
     pip.className = "die-face__pip";
-    pip.style.top = `${PIP_POSITION_PERCENT[row]}%`;
-    pip.style.left = `${PIP_POSITION_PERCENT[col]}%`;
+    pip.style.top = `${positions[row]}%`;
+    pip.style.left = `${positions[col]}%`;
     el.appendChild(pip);
   }
   return el;
@@ -111,7 +115,7 @@ function renderEquipmentCard(equipmentId) {
   const data = EQUIPMENT[equipmentId];
 
   const card = document.createElement("article");
-  card.className = "equipment-card";
+  card.className = `equipment-card equipment-card--size-${data.size}`;
   card.style.setProperty("--card-accent", data.color.header);
   card.style.setProperty("--card-body", data.color.body);
   if (data.color.slot) card.style.setProperty("--card-slot", data.color.slot);

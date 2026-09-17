@@ -2,20 +2,36 @@
 // "visual-mobile" / "visual-desktop"), which Playwright keeps as separate baseline images
 // automatically (the project name is part of the snapshot filename).
 //
-// Component-level close-ups exist alongside the full-page shot because a full-page diff can
+// Component-level close-ups exist alongside the full-page shots because a full-page diff can
 // average out a small regression (e.g. a few non-circular pips) below the pixel-ratio
 // threshold; a tight crop on just that element does not have that problem.
 //
-// Not every card is snapshotted: these cover each die-slot style (empty, MAX, EVEN, ODD,
-// countdown), the die-face, and tinted status icons. Every card still needs an eyes-on
-// comparison against its wiki card image when added (see README).
+// Every equipment card has its own snapshot, generated from js/data.js, so a card can't drift
+// after being checked by eye against its wiki card image (see README).
 const { test, expect } = require("@playwright/test");
-const { pageUrl } = require("./helpers");
+const { pageUrl, EQUIPMENT, ENEMIES } = require("./helpers");
 
 async function open(page, file) {
   await page.goto(pageUrl(file));
   await page.waitForSelector(".equipment-card, .enemy-picker__card");
 }
+
+const kebabCase = (id) => id.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+
+test.describe("Every equipment card", () => {
+  for (const equipmentId of Object.keys(EQUIPMENT)) {
+    // Snapshot the card where it first appears (an enemy may carry several copies).
+    const enemyId = Object.keys(ENEMIES).find((id) => ENEMIES[id].equipment.includes(equipmentId));
+    const index = ENEMIES[enemyId].equipment.indexOf(equipmentId);
+
+    test(`${EQUIPMENT[equipmentId].name} card`, async ({ page }) => {
+      await open(page, `enemies/${enemyId}.html`);
+      await expect(page.locator(".equipment-card").nth(index)).toHaveScreenshot(
+        `${kebabCase(equipmentId)}-card.png`
+      );
+    });
+  }
+});
 
 test.describe("Frog", () => {
   test.beforeEach(async ({ page }) => {
@@ -24,14 +40,6 @@ test.describe("Frog", () => {
 
   test("full Frog page", async ({ page }) => {
     await expect(page).toHaveScreenshot("frog-page.png", { fullPage: true });
-  });
-
-  test("Broadsword card", async ({ page }) => {
-    await expect(page.locator(".equipment-card").first()).toHaveScreenshot("broadsword-card.png");
-  });
-
-  test("Small Shield card", async ({ page }) => {
-    await expect(page.locator(".equipment-card").nth(1)).toHaveScreenshot("small-shield-card.png");
   });
 
   // An icon is too small a share of a whole card for a tint change to exceed the diff threshold.
@@ -52,16 +60,9 @@ test.describe("Frog", () => {
 });
 
 test.describe("Magician", () => {
-  test.beforeEach(async ({ page }) => {
-    await open(page, "enemies/magician.html");
-  });
-
   test("full Magician page", async ({ page }) => {
+    await open(page, "enemies/magician.html");
     await expect(page).toHaveScreenshot("magician-page.png", { fullPage: true });
-  });
-
-  test("Magic Shield card", async ({ page }) => {
-    await expect(page.locator(".equipment-card").nth(1)).toHaveScreenshot("magic-shield-card.png");
   });
 });
 
@@ -74,20 +75,9 @@ test.describe("Hothead", () => {
     await expect(page).toHaveScreenshot("hothead-page.png", { fullPage: true });
   });
 
-  test("Fireball card", async ({ page }) => {
-    await expect(page.locator(".equipment-card").first()).toHaveScreenshot("fireball-card.png");
-  });
-
   test("Fireball effect line close-up (tinted fire icons and value)", async ({ page }) => {
     const effect = page.locator(".equipment-card").first().locator(".equipment-card__effect");
     await expect(effect).toHaveScreenshot("fireball-effect.png");
-  });
-});
-
-test.describe("Space Marine", () => {
-  test("Plasma Cannon card", async ({ page }) => {
-    await open(page, "enemies/spaceMarine.html");
-    await expect(page.locator(".equipment-card").first()).toHaveScreenshot("plasma-cannon-card.png");
   });
 });
 

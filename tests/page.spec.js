@@ -56,6 +56,65 @@ test.describe("Every enemy page", () => {
       expect(consoleErrors).toEqual([]);
       expect(requests.filter((url) => !url.startsWith("file://"))).toEqual([]);
     });
+
+    // Cards have a fixed aspect ratio and clip overflow, so content that doesn't fit would be
+    // cut off silently rather than growing the card.
+    test(`${enemy.name}: every card has its size's aspect ratio and its content fits`, async ({
+      page,
+    }) => {
+      await openEnemyPage(page, enemyId);
+      const cards = await page.evaluate(() =>
+        [...document.querySelectorAll(".equipment-card")].map((card) => {
+          const box = (r) => ({ top: r.top, bottom: r.bottom, left: r.left, right: r.right });
+          const header = card.querySelector(".equipment-card__header");
+          const effect = card.querySelector(".equipment-card__effect");
+          const range = document.createRange();
+          range.selectNodeContents(effect);
+          const textRects = [...range.getClientRects()];
+          const halfLine = parseFloat(getComputedStyle(effect).lineHeight) / 2;
+          const lineCentres = [];
+          for (const c of textRects.map((r) => r.top + r.height / 2).sort((a, b) => a - b)) {
+            if (!lineCentres.length || c - lineCentres[lineCentres.length - 1] > halfLine) {
+              lineCentres.push(c);
+            }
+          }
+          const cardRect = card.getBoundingClientRect();
+          return {
+            ratio: cardRect.width / cardRect.height,
+            titleOverflow: header.scrollWidth - header.clientWidth,
+            lines: lineCentres.length,
+            body: box(card.querySelector(".equipment-card__body").getBoundingClientRect()),
+            slots: box(card.querySelector(".equipment-card__slots").getBoundingClientRect()),
+            text: box({
+              top: Math.min(...textRects.map((r) => r.top)),
+              bottom: Math.max(...textRects.map((r) => r.bottom)),
+              left: Math.min(...textRects.map((r) => r.left)),
+              right: Math.max(...textRects.map((r) => r.right)),
+            }),
+          };
+        })
+      );
+
+      const RATIOS = { 1: 1.316, 2: 0.882 };
+      const inside = (inner, outer) =>
+        inner.top >= outer.top - 0.5 &&
+        inner.bottom <= outer.bottom + 0.5 &&
+        inner.left >= outer.left - 0.5 &&
+        inner.right <= outer.right + 0.5;
+
+      for (const [i, equipmentId] of enemy.equipment.entries()) {
+        const equipment = EQUIPMENT[equipmentId];
+        const card = cards[i];
+        const label = `${equipment.name} card`;
+        expect(Math.abs(card.ratio / RATIOS[equipment.size] - 1), `${label} aspect ratio`).toBeLessThan(0.01);
+        expect(card.titleOverflow, `${label} title overflows`).toBeLessThanOrEqual(0);
+        const breaks = equipment.effect.filter((t) => t.type === "lineBreak").length;
+        expect(card.lines, `${label} effect wraps onto extra lines`).toBe(breaks + 1);
+        expect(inside(card.slots, card.body), `${label} slots inside body`).toBe(true);
+        expect(inside(card.text, card.body), `${label} effect text inside body`).toBe(true);
+        expect(card.slots.bottom, `${label} slots overlap effect text`).toBeLessThanOrEqual(card.text.top);
+      }
+    });
   }
 });
 

@@ -97,20 +97,30 @@ test.describe("createDieFace", () => {
     });
   }
 
-  test("pips are positioned with matching left/top percentages (so they stay circular)", async ({
-    page,
-  }) => {
-    const positions = await page.evaluate(() => {
-      const el = createDieFace(2);
-      return [...el.querySelectorAll(".die-face__pip")].map((p) => ({
+  // A 2-pip face is the top-right/bottom-left diagonal, as on the wiki's card art.
+  test("card die-face pips sit at the art's measured centres", async ({ page }) => {
+    const positions = await page.evaluate(() =>
+      [...createDieFace(2).querySelectorAll(".die-face__pip")].map((p) => ({
         left: p.style.left,
         top: p.style.top,
-      }));
-    });
-    // A 2-pip face is the top-left/bottom-right diagonal.
+      }))
+    );
     expect(positions).toEqual([
-      { left: "22%", top: "22%" },
-      { left: "78%", top: "78%" },
+      { left: "83.5%", top: "16.5%" },
+      { left: "16.5%", top: "83.5%" },
+    ]);
+  });
+
+  test("mini die-face pips keep their own inset layout", async ({ page }) => {
+    const positions = await page.evaluate(() =>
+      [...createDieFace(2, { mini: true }).querySelectorAll(".die-face__pip")].map((p) => ({
+        left: p.style.left,
+        top: p.style.top,
+      }))
+    );
+    expect(positions).toEqual([
+      { left: "78%", top: "22%" },
+      { left: "22%", top: "78%" },
     ]);
   });
 });
@@ -175,6 +185,15 @@ test.describe("renderEffectTokens", () => {
 });
 
 test.describe("renderEquipmentCard", () => {
+  test("adds a size modifier class from the equipment's size", async ({ page }) => {
+    const result = await page.evaluate(() => ({
+      smallShield: renderEquipmentCard("smallShield").className,
+      broadsword: renderEquipmentCard("broadsword").className,
+    }));
+    expect(result.smallShield).toBe("equipment-card equipment-card--size-1");
+    expect(result.broadsword).toBe("equipment-card equipment-card--size-2");
+  });
+
   test("sets the countdown slot fill color only for equipment that has one", async ({ page }) => {
     const result = await page.evaluate(() => ({
       plasmaCannon: renderEquipmentCard("plasmaCannon").style.getPropertyValue("--card-slot"),
