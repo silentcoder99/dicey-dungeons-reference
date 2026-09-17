@@ -203,3 +203,108 @@ test.describe("renderEquipmentCard", () => {
     expect(result.broadsword).toBe("");
   });
 });
+
+test.describe("createDieSlot: exact requirement", () => {
+  test('"exact" renders an unlabelled socket holding N pips at the die-face positions', async ({
+    page,
+  }) => {
+    const result = await page.evaluate(() => {
+      const el = createDieSlot({ type: "exact", value: 2 });
+      return {
+        className: el.className,
+        label: el.querySelector(".die-slot__label"),
+        pips: [...el.querySelectorAll(".die-slot__pip")].map((p) => [p.style.left, p.style.top]),
+      };
+    });
+    expect(result.className).toBe("die-slot die-slot--exact");
+    expect(result.label).toBeNull();
+    expect(result.pips).toEqual([
+      ["83.5%", "16.5%"],
+      ["16.5%", "83.5%"],
+    ]);
+  });
+});
+
+test.describe("createRequirementSlots", () => {
+  test("a single uncaptioned requirement is one plain socket", async ({ page }) => {
+    const classes = await page.evaluate(() =>
+      createRequirementSlots({ type: "max", value: 3 }).map((el) => el.className)
+    );
+    expect(classes).toEqual(["die-slot die-slot--max"]);
+  });
+
+  test("an array gives one socket per entry", async ({ page }) => {
+    const classes = await page.evaluate(() =>
+      createRequirementSlots([null, null]).map((el) => el.className)
+    );
+    expect(classes).toEqual(["die-slot", "die-slot"]);
+  });
+
+  test('"exact" wraps its socket in a group captioned NEEDS N', async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const [group] = createRequirementSlots({ type: "exact", value: 4 });
+      return {
+        className: group.className,
+        slots: group.querySelectorAll(".die-slot--exact").length,
+        caption: group.querySelector(".slot-group__caption").textContent,
+      };
+    });
+    expect(result).toEqual({ className: "slot-group slot-group--exact", slots: 1, caption: "NEEDS 4" });
+  });
+
+  test('"doubles" is two empty sockets joined by an equals sign, captioned NEEDS DOUBLES', async ({
+    page,
+  }) => {
+    const result = await page.evaluate(() => {
+      const [group] = createRequirementSlots({ type: "doubles" });
+      return {
+        children: [...group.children].map((el) => el.className),
+        caption: group.querySelector(".slot-group__caption").textContent,
+      };
+    });
+    expect(result.children).toEqual([
+      "die-slot",
+      "slot-group__equals",
+      "die-slot",
+      "slot-group__caption",
+    ]);
+    expect(result.caption).toBe("NEEDS DOUBLES");
+  });
+});
+
+test.describe("renderEffectTokens: muted text", () => {
+  test("a muted text token renders in its own dimmed span", async ({ page }) => {
+    const html = await page.evaluate(() => {
+      const container = document.createElement("div");
+      container.appendChild(renderEffectTokens([{ type: "text", text: "(Reuseable)", muted: true }]));
+      return container.innerHTML;
+    });
+    expect(html).toBe('<span class="effect-muted">(Reuseable)</span>');
+  });
+});
+
+test.describe("renderEquipmentCard: captioned requirements", () => {
+  test("marks cards whose requirement prints a caption", async ({ page }) => {
+    const result = await page.evaluate(() => ({
+      flameSpell: renderEquipmentCard("flameSpell").classList.contains("equipment-card--captioned"),
+      iceAge: renderEquipmentCard("iceAge").classList.contains("equipment-card--captioned"),
+      smallShield: renderEquipmentCard("smallShield").classList.contains("equipment-card--captioned"),
+    }));
+    expect(result).toEqual({ flameSpell: true, iceAge: true, smallShield: false });
+  });
+});
+
+test.describe("injectIconSprite", () => {
+  test("adds one hidden sprite with a symbol per icon, even if called again", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      injectIconSprite();
+      return {
+        sprites: document.querySelectorAll("#icon-sprite").length,
+        symbols: [...document.querySelectorAll("#icon-sprite symbol")].map((s) => s.id),
+      };
+    });
+    const { ICON_SYMBOLS } = require("../js/icons.js");
+    expect(result.sprites).toBe(1);
+    expect(result.symbols).toEqual(Object.keys(ICON_SYMBOLS).map((name) => `icon-${name}`));
+  });
+});

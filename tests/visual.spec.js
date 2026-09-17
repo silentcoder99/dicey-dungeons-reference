@@ -9,11 +9,11 @@
 // Every equipment card has its own snapshot, generated from js/data.js, so a card can't drift
 // after being checked by eye against its wiki card image (see README).
 const { test, expect } = require("@playwright/test");
-const { pageUrl, EQUIPMENT, ENEMIES } = require("./helpers");
+const { pageUrl, EQUIPMENT, ENEMIES, pageEquipment } = require("./helpers");
 
 async function open(page, file) {
   await page.goto(pageUrl(file));
-  await page.waitForSelector(".equipment-card, .enemy-picker__card");
+  await page.waitForSelector(".equipment-section, .enemy-picker__card");
 }
 
 const kebabCase = (id) => id.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
@@ -21,8 +21,8 @@ const kebabCase = (id) => id.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 test.describe("Every equipment card", () => {
   for (const equipmentId of Object.keys(EQUIPMENT)) {
     // Snapshot the card where it first appears (an enemy may carry several copies).
-    const enemyId = Object.keys(ENEMIES).find((id) => ENEMIES[id].equipment.includes(equipmentId));
-    const index = ENEMIES[enemyId].equipment.indexOf(equipmentId);
+    const enemyId = Object.keys(ENEMIES).find((id) => pageEquipment(ENEMIES[id]).includes(equipmentId));
+    const index = pageEquipment(ENEMIES[enemyId]).indexOf(equipmentId);
 
     test(`${EQUIPMENT[equipmentId].name} card`, async ({ page }) => {
       await open(page, `enemies/${enemyId}.html`);
@@ -85,5 +85,45 @@ test.describe("Enemy picker", () => {
   test("full picker page", async ({ page }) => {
     await open(page, "index.html");
     await expect(page).toHaveScreenshot("picker-page.png", { fullPage: true });
+  });
+});
+
+// Close-ups of the effect lines that introduce each newer tinted icon or dimmed note, for the same
+// reason as the Small Shield and Fireball ones above.
+test.describe("Tinted icon close-ups", () => {
+  const CLOSE_UPS = [
+    ["beatrice", "beeSting", "shock"],
+    ["wizard", "freezeSpell", "ice"],
+    ["alchemist", "bearPotion", "heal"],
+    ["drake", "bloodSuck", "drain"],
+    ["drake", "smogCloud", "poison and blind"],
+    ["stickyHands", "pickpocket", "gold, muted note"],
+    ["wisp", "foolsFire", "vanish"],
+    ["warlock", "shootingStar", "confuse"],
+    ["rhinoBeetle", "beetleHeadbutt", "lock"],
+  ];
+  for (const [enemyId, equipmentId, what] of CLOSE_UPS) {
+    test(`${EQUIPMENT[equipmentId].name} effect line close-up (${what})`, async ({ page }) => {
+      await open(page, `enemies/${enemyId}.html`);
+      const index = pageEquipment(ENEMIES[enemyId]).indexOf(equipmentId);
+      const effect = page.locator(".equipment-card").nth(index).locator(".equipment-card__effect");
+      await expect(effect).toHaveScreenshot(`${kebabCase(equipmentId)}-effect.png`);
+    });
+  }
+});
+
+test.describe("Keymaster", () => {
+  test("full Keymaster page (exact-requirement sockets and an extra equipment section)", async ({
+    page,
+  }) => {
+    await open(page, "enemies/keymaster.html");
+    await expect(page).toHaveScreenshot("keymaster-page.png", { fullPage: true });
+  });
+});
+
+test.describe("Scathach", () => {
+  test("full Scathach page (boss; captioned sockets beside die-faces)", async ({ page }) => {
+    await open(page, "enemies/scathach.html");
+    await expect(page).toHaveScreenshot("scathach-page.png", { fullPage: true });
   });
 });

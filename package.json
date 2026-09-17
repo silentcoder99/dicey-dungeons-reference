@@ -4,7 +4,8 @@
   "description": "Mobile-friendly reference site for Dicey Dungeons enemies and equipment.",
   "scripts": {
     "test": "playwright test",
-    "test:update-snapshots": "playwright test --update-snapshots"
+    "test:update-snapshots": "playwright test --update-snapshots",
+    "fetch-wiki": "node scripts/fetch-wiki.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"

@@ -1,6 +1,6 @@
 // Structural/content assertions against the actually-rendered enemy pages.
 const { test, expect } = require("@playwright/test");
-const { pageUrl, EQUIPMENT, ENEMIES, ENEMY_IDS } = require("./helpers");
+const { pageUrl, EQUIPMENT, ENEMIES, ENEMY_IDS, pageEquipment } = require("./helpers");
 
 // Opens a page, recording console/page errors and every requested URL.
 async function openEnemyPage(page, enemyId) {
@@ -13,7 +13,7 @@ async function openEnemyPage(page, enemyId) {
   page.on("request", (req) => requests.push(req.url()));
 
   await page.goto(pageUrl(`enemies/${enemyId}.html`));
-  await page.waitForSelector(".equipment-card");
+  await page.waitForSelector(".equipment-section");
   return { consoleErrors, requests };
 }
 
@@ -27,6 +27,7 @@ function expectedEffectText(tokens) {
 test.describe("Every enemy page", () => {
   for (const enemyId of ENEMY_IDS) {
     const enemy = ENEMIES[enemyId];
+    const cardIds = pageEquipment(enemy);
 
     test(`${enemy.name}: renders its data with no errors or external requests`, async ({
       page,
@@ -41,9 +42,24 @@ test.describe("Every enemy page", () => {
         enemy.innateEffects.length ? enemy.innateEffects.join(", ") : "None"
       );
 
+      const sections = page.locator(".equipment-section");
+      const groups = [
+        { heading: "Equipment", equipment: enemy.equipment, note: enemy.equipmentNote },
+        ...(enemy.extraEquipment || []),
+      ];
+      await expect(sections).toHaveCount(groups.length);
+      for (const [i, group] of groups.entries()) {
+        await expect(sections.nth(i).locator("h2")).toHaveText(group.heading);
+        await expect(sections.nth(i).locator(".equipment-card")).toHaveCount(group.equipment.length);
+        await expect(sections.nth(i).locator(".equipment-section__note")).toHaveCount(group.note ? 1 : 0);
+        if (group.note) {
+          await expect(sections.nth(i).locator(".equipment-section__note")).toHaveText(group.note);
+        }
+      }
+
       const cards = page.locator(".equipment-card");
-      await expect(cards).toHaveCount(enemy.equipment.length);
-      for (const [i, equipmentId] of enemy.equipment.entries()) {
+      await expect(cards).toHaveCount(cardIds.length);
+      for (const [i, equipmentId] of cardIds.entries()) {
         const equipment = EQUIPMENT[equipmentId];
         await expect(cards.nth(i).locator(".equipment-card__header")).toHaveText(equipment.name);
         await expect(cards.nth(i).locator(".equipment-card__effect")).toHaveText(
@@ -102,7 +118,7 @@ test.describe("Every enemy page", () => {
         inner.left >= outer.left - 0.5 &&
         inner.right <= outer.right + 0.5;
 
-      for (const [i, equipmentId] of enemy.equipment.entries()) {
+      for (const [i, equipmentId] of cardIds.entries()) {
         const equipment = EQUIPMENT[equipmentId];
         const card = cards[i];
         const label = `${equipment.name} card`;

@@ -19,7 +19,7 @@ module.exports = defineConfig({
   projects: [
     {
       name: "functional",
-      testMatch: /(page|unit)\.spec\.js/,
+      testMatch: /(page|unit|data)\.spec\.js/,
       use: { viewport: { width: 1000, height: 800 } },
     },
     {

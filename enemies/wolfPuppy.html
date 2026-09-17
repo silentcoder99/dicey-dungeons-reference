@@ -8,44 +8,12 @@
   <link rel="stylesheet" href="../css/equipment-card.css">
 </head>
 <body>
-  <!-- Hand-built icon sprite (no game assets embedded) -->
-  <svg style="display:none" aria-hidden="true">
-    <symbol id="icon-sword" viewBox="0 0 24 24">
-      <g transform="rotate(45 12 12)">
-        <rect x="9.8" y="1.5" width="4.4" height="13.5" rx="0.8"></rect>
-        <rect x="5.5" y="14.5" width="13" height="3.2" rx="0.8"></rect>
-        <rect x="9.8" y="17.2" width="4.4" height="5.3" rx="0.8"></rect>
-      </g>
-    </symbol>
-    <symbol id="icon-shield" viewBox="0 0 24 24">
-      <path d="M12 2l7 3v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V5l7-3z"></path>
-    </symbol>
-    <symbol id="icon-fire" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round">
-        <path d="M12 2c.8 3.6 3.4 5.6 5.2 8.1 1.2 1.7 2 3.4 2 5.5 0 3.9-3.2 6.9-7.2 6.9s-7.2-3-7.2-6.9c0-2.8 1.3-4.9 3.2-6.6.2 1.6.9 2.8 2 3.6C9.9 8.8 11 5.4 12 2z"></path>
-        <path d="M12 13.2c-1.7 1.5-2.8 2.9-2.8 4.5 0 1.6 1.2 2.8 2.8 2.8s2.8-1.2 2.8-2.8c0-1.6-1.1-3-2.8-4.5z"></path>
-      </g>
-    </symbol>
-    <symbol id="icon-poison" viewBox="0 0 24 24">
-      <path fill-rule="evenodd" d="M9.5 7a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15zM7.2 9.6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"></path>
-      <circle cx="17.8" cy="5" r="3"></circle>
-      <circle cx="21" cy="11" r="1.9"></circle>
-    </symbol>
-    <symbol id="icon-weaken" viewBox="0 0 24 24">
-      <path fill-rule="evenodd" d="M12 2.5c4.8 0 9.5 5.4 9.5 11.2 0 4.8-3.8 7.8-9.5 7.8S2.5 18.5 2.5 13.7C2.5 7.9 7.2 2.5 12 2.5zM13.9 5.8 8.4 13.2h3.4l-2 6.4 5.8-8.7h-3.4l1.7-5.1z"></path>
-    </symbol>
-    <symbol id="icon-thorns" viewBox="0 0 24 24">
-      <g transform="rotate(45 12 12)">
-        <path d="M12 1l1.6 6 3.9-1.5-3.5 4.5v4l4.5 1.5-4.5 2-.8 5.5h-2.4l-.8-5.5-4.5-2 4.5-1.5v-4L6.5 5.5l3.9 1.5z"></path>
-      </g>
-    </symbol>
-  </svg>
-
   <main class="page" id="enemy-root">
     <a class="back-link" href="../index.html">&larr; All enemies</a>
   </main>
 
   <script src="../js/data.js"></script>
+  <script src="../js/icons.js"></script>
   <script src="../js/render.js"></script>
   <script>document.addEventListener("DOMContentLoaded", () => renderEnemyPage("wolfPuppy"));</script>
 </body>

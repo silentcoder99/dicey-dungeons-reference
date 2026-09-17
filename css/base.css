@@ -96,6 +96,17 @@ h1, h2 {
   margin-bottom: 1rem;
 }
 
+.equipment-section + .equipment-section {
+  margin-top: 2rem;
+}
+
+.equipment-section__note {
+  text-align: center;
+  margin: 0;
+  opacity: 0.6;
+  font-style: italic;
+}
+
 .equipment-grid {
   display: flex;
   flex-wrap: wrap;
@@ -127,6 +138,21 @@ h1, h2 {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1.5rem;
+}
+
+.picker-group__heading {
+  text-align: center;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin-bottom: 1rem;
+}
+
+.picker-divider {
+  border: 0;
+  border-top: 2px solid #4b3a63;
+  margin: 1.75rem 0 1.25rem;
 }
 
 .enemy-picker {

@@ -26,6 +26,14 @@
   --effect-centre: 85.5%;
 }
 
+/* Cards whose requirement prints a caption ("NEEDS 4") under the socket: size-1 art lifts the
+   socket and tucks the caption right under it to make room; size-2 art has room already. */
+.equipment-card--size-1.equipment-card--captioned {
+  --slot-centre: 40.5%;
+  --effect-centre: 82%;
+  --caption-gap: 0cqw;
+}
+
 .equipment-card__header {
   flex: none;
   height: 12.9cqw;
@@ -129,18 +137,18 @@
 }
 
 /* The card's own slots and die-face (not the mini ones inside the effect text) */
-.equipment-card__slots > .die-slot,
+.equipment-card__slots .die-slot,
 .equipment-card__slots > .die-face {
   --slot-size: 31.6cqw;
 }
 
-.equipment-card__slots > .die-slot {
+.equipment-card__slots .die-slot {
   border-width: 1cqw;
   border-radius: 2cqw;
   font-weight: 400;
 }
 
-.equipment-card__slots > .die-slot--countdown {
+.equipment-card__slots .die-slot--countdown {
   border-width: 1.1cqw;
 }
 
@@ -159,6 +167,72 @@
 
 .equipment-card__slots .die-slot--countdown .die-slot__value {
   font-size: 19.5cqw;
+}
+
+/* "Require N": the empty socket shows N grey pips, laid out like a die face. */
+.die-slot--exact {
+  position: relative;
+}
+
+.die-slot__pip {
+  position: absolute;
+  width: 17%;
+  height: 17%;
+  border-radius: 50%;
+  background: #b3b3b3;
+  transform: translate(-50%, -50%);
+}
+
+/* A socket (or pair of sockets) with a caption printed underneath. The caption is positioned
+   outside the group's box so the socket itself stays centred where the art puts it. */
+.slot-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.slot-group__caption {
+  position: absolute;
+  top: calc(100% + var(--caption-gap, 0.8cqw));
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 5.7cqw;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* "Doubles": two sockets close together, joined by a grey "=" drawn across the gap. */
+.slot-group--doubles {
+  gap: 3.1cqw;
+}
+
+.slot-group__equals {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7.2cqw;
+  height: 7.9cqw;
+  transform: translate(-50%, -50%);
+}
+
+.slot-group__equals::before,
+.slot-group__equals::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2.8cqw;
+  border-radius: 1cqw;
+  background: #8c8b8b;
+}
+
+.slot-group__equals::before {
+  top: 0;
+}
+
+.slot-group__equals::after {
+  bottom: 0;
 }
 
 /* ---------- Die-face: a solid die showing pips, for a fixed number rendered as a real die ---------- */
@@ -238,4 +312,46 @@
 .glyph--poison,
 .effect-value--poison {
   color: #bda0f4;
+}
+
+.glyph--shock,
+.effect-value--shock,
+.glyph--confuse,
+.effect-value--confuse {
+  color: #fff830;
+}
+
+.glyph--ice,
+.effect-value--ice {
+  color: #42ebff;
+}
+
+.glyph--heal,
+.effect-value--heal {
+  color: #98e941;
+}
+
+.glyph--drain,
+.effect-value--drain {
+  color: #fd5e6c;
+}
+
+.glyph--blind,
+.effect-value--blind {
+  color: #9d9d9d;
+}
+
+.glyph--gold,
+.effect-value--gold {
+  color: #fdf631;
+}
+
+.glyph--vanish,
+.effect-value--vanish {
+  color: #f95efd;
+}
+
+/* Secondary notes such as "(2 uses this turn)" are printed a little dimmer than the effect. */
+.effect-muted {
+  color: #dddddd;
 }
