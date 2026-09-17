@@ -14,6 +14,12 @@ const DIE_PIP_LAYOUTS = {
   6: [[1, 1], [2, 1], [3, 1], [1, 3], [2, 3], [3, 3]],
 };
 
+// Row/column 1-3 -> percentage position within the die face. Pips are placed by percentage
+// (not a CSS grid cell) so they stay perfectly circular and evenly spaced at any size --
+// grid-track + aspect-ratio sizing rounds unpredictably once the die face is only a few
+// pixels across (e.g. the mini header icon).
+const PIP_POSITION_PERCENT = { 1: 22, 2: 50, 3: 78 };
+
 // Purely symbolic pip count for the "these are dice" icon in the enemy header.
 const GENERIC_DICE_ICON_PIPS = 3;
 
@@ -51,8 +57,8 @@ function createDieFace(pips, { mini = false } = {}) {
   for (const [row, col] of DIE_PIP_LAYOUTS[pips] || []) {
     const pip = document.createElement("span");
     pip.className = "die-face__pip";
-    pip.style.gridRow = String(row);
-    pip.style.gridColumn = String(col);
+    pip.style.top = `${PIP_POSITION_PERCENT[row]}%`;
+    pip.style.left = `${PIP_POSITION_PERCENT[col]}%`;
     el.appendChild(pip);
   }
   return el;

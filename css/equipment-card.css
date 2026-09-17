@@ -68,13 +68,22 @@
 }
 
 .die-slot--max {
+  /* Matches the wiki card art: the hash fill alternates between the card's own
+     body and accent colors, not a plain white overlay. */
   background-image: repeating-linear-gradient(
     45deg,
-    rgba(255, 255, 255, 0.4) 0,
-    rgba(255, 255, 255, 0.4) 2px,
-    transparent 2px,
-    transparent 8px
+    var(--card-accent, #999) 0,
+    var(--card-accent, #999) 4px,
+    var(--card-body, #333) 4px,
+    var(--card-body, #333) 8px
   );
+}
+
+.die-slot__label,
+.die-slot__value {
+  /* The fill alternates between a bright and a dark stripe, so give the text a
+     drop shadow rather than relying on raw contrast against either stripe. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
 }
 
 .die-slot__label {
@@ -102,27 +111,28 @@
   height: var(--slot-size);
   background: #ece6e6;
   border-radius: 6px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  padding: 15%;
+  position: relative;
   flex-shrink: 0;
 }
 
 .die-face--mini {
-  --slot-size: 1.15em;
+  --slot-size: 1.4em;
   border-radius: 3px;
   vertical-align: middle;
-  display: inline-grid;
+  display: inline-block;
 }
 
+/* Positioned (via inline left/top from render.js) rather than placed in a CSS grid cell:
+   at very small sizes, grid track + aspect-ratio rounding produced pips that were neither
+   perfectly circular nor evenly spaced. A fixed square (equal % of width and height, on a
+   square parent) is exact at any size. */
 .die-face__pip {
-  width: 100%;
-  aspect-ratio: 1;
+  position: absolute;
+  width: 24%;
+  height: 24%;
   border-radius: 50%;
   background: #4a3b3b;
-  align-self: center;
-  justify-self: center;
+  transform: translate(-50%, -50%);
 }
 
 /* ---------- Inline glyphs (sword, shield, ...) ---------- */
