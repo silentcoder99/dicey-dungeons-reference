@@ -3,16 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Enemies &ndash; Dicey Dungeons Reference</title>
+  <title>Dicey Dungeons Reference</title>
   <link rel="stylesheet" href="css/base.css">
 </head>
 <body>
-  <main class="page" id="picker-root">
-    <h1 class="picker-title">Enemies</h1>
+  <!-- Nothing here is data-driven, so the hub needs no scripts at all. -->
+  <main class="page" id="home-root">
+    <h1 class="picker-title">Dicey Dungeons</h1>
+    <ul class="home-menu">
+      <li>
+        <a class="picker-card home-menu__card" href="enemies.html">
+          <span class="home-menu__title">Enemies</span>
+          <span class="home-menu__hint">Stats and cards for every enemy and boss</span>
+        </a>
+      </li>
+      <li>
+        <a class="picker-card home-menu__card" href="equipment.html">
+          <span class="home-menu__title">Equipment</span>
+          <span class="home-menu__hint">Search equipment and see what it upgrades into</span>
+        </a>
+      </li>
+    </ul>
   </main>
-
-  <script src="js/data.js"></script>
-  <script src="js/render.js"></script>
-  <script>document.addEventListener("DOMContentLoaded", () => renderEnemyPicker());</script>
 </body>
 </html>

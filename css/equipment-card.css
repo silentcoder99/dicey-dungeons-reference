@@ -355,3 +355,38 @@
 .effect-muted {
   color: #dddddd;
 }
+
+/* ---------- Upgrade ribbon ----------
+   The banner an upgraded card wears over its header band, traced from art-references/. The SVG's
+   viewBox is in card-width units, so it keeps the art's proportions at any card width like the
+   rest of the card. It sits under the header so the title prints on top of the band, and the
+   card's own `overflow: hidden` clips the ~1.6cqw of arc that overhangs the card's top edge in
+   the art -- a deliberate difference, see README. */
+.upgrade-ribbon {
+  position: absolute;
+  /* Matches the viewBox's -2 origin, so a path's y is measured from the card's top edge. */
+  top: -2cqw;
+  left: 0;
+  width: 100%;
+  height: 29cqw;
+  pointer-events: none;
+}
+
+/* The art's ribbon is one flat color plus the shadow it casts; there is no third fold tone. */
+.upgrade-ribbon__body {
+  fill: var(--card-ribbon, #c0882f);
+}
+
+/* Translucent rather than a fixed hex: the art's shadow is the card's body color multiplied by
+   ~0.66, which this reproduces over every card's palette. */
+.upgrade-ribbon__shadow {
+  fill: rgba(0, 0, 0, 0.34);
+}
+
+/* The title now prints on the ribbon's band, which is narrower than the header. Constraining the
+   padding is all fitCardTitles() needs to shrink a long "+" title to the band instead of the card. */
+.equipment-card--upgraded .equipment-card__header {
+  position: relative;
+  z-index: 1;
+  padding: 0 16cqw;
+}

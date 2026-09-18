@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Equipment &ndash; Dicey Dungeons Reference</title>
+  <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+  <main class="page" id="equipment-search-root">
+    <a class="back-link" href="index.html">&larr; Home</a>
+    <h1 class="picker-title">Equipment</h1>
+    <!-- Static so the field is usable before the list is built. -->
+    <label class="equipment-search">
+      <span class="equipment-search__label">Search by name</span>
+      <input class="equipment-search__input" id="equipment-search-input" type="search"
+             autocomplete="off" placeholder="Broadsword">
+    </label>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/render.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", () => renderEquipmentSearch());</script>
+</body>
+</html>

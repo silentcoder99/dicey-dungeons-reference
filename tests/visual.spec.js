@@ -9,11 +9,11 @@
 // Every equipment card has its own snapshot, generated from js/data.js, so a card can't drift
 // after being checked by eye against its wiki card image (see README).
 const { test, expect } = require("@playwright/test");
-const { pageUrl, EQUIPMENT, ENEMIES, pageEquipment } = require("./helpers");
+const { pageUrl, EQUIPMENT, EQUIPMENT_IDS, ENEMIES, pageEquipment } = require("./helpers");
 
 async function open(page, file) {
   await page.goto(pageUrl(file));
-  await page.waitForSelector(".equipment-section, .enemy-picker__card");
+  await page.waitForSelector(".equipment-section, .picker-card, .upgrade-pair");
 }
 
 const kebabCase = (id) => id.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
@@ -28,6 +28,20 @@ test.describe("Every equipment card", () => {
       await open(page, `enemies/${enemyId}.html`);
       await expect(page.locator(".equipment-card").nth(index)).toHaveScreenshot(
         `${kebabCase(equipmentId)}-card.png`
+      );
+    });
+  }
+});
+
+// Snapshotted from the equipment pages, where an upgraded card is the only place one is drawn. The
+// base cards keep their own snapshots on the enemy pages above, so a change here can't quietly move
+// them too.
+test.describe("Every upgraded equipment card", () => {
+  for (const equipmentId of EQUIPMENT_IDS) {
+    test(`${EQUIPMENT[equipmentId].name}+ card`, async ({ page }) => {
+      await open(page, `equipment/${equipmentId}.html`);
+      await expect(page.locator(".equipment-card").nth(1)).toHaveScreenshot(
+        `${kebabCase(equipmentId)}-card-upgraded.png`
       );
     });
   }
@@ -83,8 +97,46 @@ test.describe("Hothead", () => {
 
 test.describe("Enemy picker", () => {
   test("full picker page", async ({ page }) => {
-    await open(page, "index.html");
+    await open(page, "enemies.html");
     await expect(page).toHaveScreenshot("picker-page.png", { fullPage: true });
+  });
+});
+
+test.describe("Equipment reference", () => {
+  test("full home page", async ({ page }) => {
+    await open(page, "index.html");
+    await expect(page).toHaveScreenshot("home-page.png", { fullPage: true });
+  });
+
+  test("full equipment search page", async ({ page }) => {
+    await open(page, "equipment.html");
+    await expect(page).toHaveScreenshot("equipment-search-page.png", { fullPage: true });
+  });
+
+  test("equipment search page, filtered", async ({ page }) => {
+    await open(page, "equipment.html");
+    await page.locator("#equipment-search-input").fill("crystal");
+    await expect(page).toHaveScreenshot("equipment-search-filtered.png", { fullPage: true });
+  });
+
+  // Battle Axe's upgrade changes the card's size, Snowball's adds a die-face and a line of effect
+  // text -- between them, everything an upgrade can do to a card's layout.
+  test("full Battle Axe page (upgrade changes the card's size)", async ({ page }) => {
+    await open(page, "equipment/battleAxe.html");
+    await expect(page).toHaveScreenshot("battle-axe-page.png", { fullPage: true });
+  });
+
+  test("full Snowball page (upgrade adds a die-face)", async ({ page }) => {
+    await open(page, "equipment/snowball.html");
+    await expect(page).toHaveScreenshot("snowball-page.png", { fullPage: true });
+  });
+
+  // The ribbon is a small share of a whole card, so a change to its shape or color could average
+  // below the diff threshold on the card snapshots -- same reason the icon close-ups exist.
+  test("upgrade ribbon close-up", async ({ page }) => {
+    await open(page, "equipment/battleAxe.html");
+    const ribbon = page.locator(".equipment-card--upgraded .upgrade-ribbon");
+    await expect(ribbon).toHaveScreenshot("upgrade-ribbon.png");
   });
 });
 

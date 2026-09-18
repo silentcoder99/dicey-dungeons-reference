@@ -131,7 +131,7 @@ h1, h2 {
   text-decoration: underline;
 }
 
-/* ---------- Enemy picker (index.html) ---------- */
+/* ---------- Pickers (enemies.html, equipment.html) ---------- */
 .picker-title {
   text-align: center;
   font-size: clamp(1.75rem, 6vw, 2.5rem);
@@ -155,7 +155,7 @@ h1, h2 {
   margin: 1.75rem 0 1.25rem;
 }
 
-.enemy-picker {
+.picker-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -164,7 +164,7 @@ h1, h2 {
   gap: 0.75rem;
 }
 
-.enemy-picker__card {
+.picker-card {
   display: block;
   padding: 1rem 0.75rem;
   border: 2px solid #4b3a63;
@@ -178,10 +178,155 @@ h1, h2 {
   letter-spacing: 0.03em;
 }
 
-.enemy-picker__card:hover,
-.enemy-picker__card:focus-visible {
+.picker-card:hover,
+.picker-card:focus-visible {
   border-color: #a58bd0;
   background: #352846;
+}
+
+/* ---------- Home menu (index.html) ---------- */
+.home-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+}
+
+.home-menu__card {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.home-menu__title {
+  font-size: 1.25rem;
+}
+
+.home-menu__hint {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
+
+/* ---------- Equipment search (equipment.html) ---------- */
+.equipment-search {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.equipment-search__label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin-bottom: 0.35rem;
+}
+
+.equipment-search__input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 2px solid #4b3a63;
+  border-radius: 10px;
+  background: #2a2038;
+  color: inherit;
+  font: inherit;
+}
+
+.equipment-search__input:focus-visible {
+  outline: none;
+  border-color: #a58bd0;
+}
+
+.equipment-search__status {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+/* ---------- Equipment page (equipment/<id>.html) ---------- */
+.equipment-page__name {
+  text-align: center;
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+}
+
+/* The regular card, an arrow, then the upgraded one, as the game's own art presents an upgrade. */
+.upgrade-pair {
+  display: flex;
+  /* Top-aligned, so the two headings line up even when an upgrade changes the card's size and the
+     cards no longer have the same height. */
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.upgrade-pair__side {
+  flex: 1 1 220px;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The card is sized by its column here, not by the flex basis it uses in an equipment grid --
+   leaving that basis in place would set the card's *height* in this column flex and break its
+   aspect ratio. */
+.upgrade-pair .equipment-card {
+  flex: none;
+  width: 100%;
+  max-width: none;
+}
+
+.upgrade-pair__heading {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin-bottom: 0.75rem;
+}
+
+.upgrade-pair__arrow {
+  flex: none;
+  align-self: center;
+  width: 1.75rem;
+  fill: currentColor;
+  opacity: 0.45;
+}
+
+.upgrade-pair__note {
+  text-align: center;
+  margin: 1.5rem 0 0;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Two cards plus the arrow stop fitting side by side well below the .page cap, so stack them and
+   turn the arrow to match. */
+@media (max-width: 32rem) {
+  /* Stacked, the flex axes swap: the sides are sized across the column by `align-items` and down
+     it by `flex`, so both need resetting or the sides collapse to their content. */
+  .upgrade-pair {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .upgrade-pair__side {
+    flex: none;
+    width: 100%;
+  }
+
+  .upgrade-pair__arrow {
+    transform: rotate(90deg);
+    margin: 0.25rem 0;
+  }
 }
 
 @media (min-width: 600px) {

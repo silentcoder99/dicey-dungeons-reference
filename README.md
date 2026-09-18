@@ -1,10 +1,16 @@
 # Dicey Dungeons Reference (Prototype)
 
-A mobile-friendly reference site for [Dicey Dungeons](https://www.diceydungeons.com/), showing
-only what a player can see **mid-combat** for a given enemy: its name, dice count, max HP, any
-innate effects, and its equipment (name, color, size, dice requirements, effect, and initial
-state — the last of these is expressed through a `countdown` requirement, see below, rather
-than a separate field). Covers base-game ("Normal" difficulty) content only.
+A mobile-friendly reference site for [Dicey Dungeons](https://www.diceydungeons.com/), answering
+two questions:
+
+- **What will this enemy hit me with?** For a given enemy, only what a player can see
+  **mid-combat**: its name, dice count, max HP, any innate effects, and its equipment (name, color,
+  size, dice requirements, effect, and initial state — the last of these is expressed through a
+  `countdown` requirement, see below, rather than a separate field).
+- **If I buy this, what does it upgrade into?** For a given piece of equipment, its regular card and
+  its upgraded card side by side.
+
+Covers base-game ("Normal" difficulty) content only.
 
 No build step, no framework, no external requests — open any `.html` page directly in a browser.
 
@@ -14,19 +20,31 @@ colors, icons, slot styling and effect wording from that equipment's **card imag
 
 Visuals (card shapes, colors, die-slot/die-face icons) are hand-built with CSS/SVG to match the
 game's own conventions. No game assets (sprites, card art) are embedded, since those are
-copyrighted; only the layout and color conventions are recreated. Card colors in `js/data.js`
+copyrighted; only the layout and color conventions are recreated. The screenshots in
+`art-references/` are the exception: they are the only reference for what an upgraded card looks
+like, since the wiki has none, and nothing on the site links to them. Card colors in `js/data.js`
 were pixel-sampled from the official wiki's card images (not eyeballed). The site itself still has
 no build step, but there is an automated test suite (Playwright) that renders the pages in a real
 browser and checks both content/structure and visual appearance — see "Tests" below.
 
 ## Pages
 
-- `index.html` — the enemy picker: links to every enemy page, generated from `ENEMIES` in
+- `index.html` — the site root: two cards, one per reference section. Nothing on it is
+  data-driven, so it loads no scripts at all.
+- `enemies.html` — the enemy picker: links to every enemy page, generated from `ENEMIES` in
   `js/data.js` and grouped under a heading per level (Level 1–5), then Bosses, with a divider
   between groups. Each enemy page has a back-link to it.
 - `enemies/<enemyId>.html` — one page per enemy. The filename is the enemy's key in `ENEMIES`
   (e.g. `enemies/spaceMarine.html`). Covers every enemy and boss on the wiki's enemy list except
   Jester and Lady Luck.
+- `equipment.html` — the equipment search: a live-filtered list of every entry in `EQUIPMENT`,
+  matched on a case-insensitive substring of the name. The project's only interactive control.
+- `equipment/<equipmentId>.html` — one page per piece of equipment, showing its regular card and
+  its upgraded card side by side. The filename is the equipment's key in `EQUIPMENT`
+  (e.g. `equipment/battleAxe.html`).
+
+Equipment the player can only get by stealing from an enemy is listed like everything else —
+several classes can steal, so every card in `EQUIPMENT` is one a player may end up holding.
 
 Some enemies don't have a simple fixed loadout. Their pages show what the player can see:
 
@@ -59,6 +77,25 @@ differently. Writing the cards turned up all of these, none of them in the text:
 The image is at `https://wiki.diceydungeons.com/lib/exe/fetch.php?media=equipment:<file>.png`,
 where `<file>` is the image name in the equipment page's raw text (usually the page id, but not
 always — Small Shield's is `smallshield.png`).
+
+**Upgrade data is the one place the card image can't settle it.** The wiki has no upgraded card
+image — only one image per equipment — so an `upgrade` override is derived from the
+`Upgraded Effect` / `Upgraded Requirements` / `Upgraded Size` rows of the equipment's raw page
+instead. Three things to watch:
+
+- Apply the wiki row's **delta** to the base card's existing tokens rather than transcribing the
+  wiki's prose, which words things differently (Campfire's card reads `fire 1 dmg, burn a dice`
+  where the wiki says "Deal 1 fire damage, burn a dice"; its upgrade is "a dice" → "two dice").
+- The wiki text is not complete. Snowball's upgraded card gains a die-face that only
+  `art-references/snowball_upgrade.png` shows; the table has only the "+ 1". Where an upgrade adds a
+  flat `+ N` to a die-slot's value, the card draws that N as a die-face *and* prints it, the way
+  Broadsword's base card already does.
+- Some pages carry a **second stats table** for the enemy/Jester version of the card (Battle Axe,
+  Electromagnet, Hammer, Sneeze, Spike). This site's equipment pages are about what the player buys,
+  so the first table is the one that counts.
+
+Effect text is limited to **two lines**: a third overflows the body panel on a size-2 card, which
+`tests/equipment-page.spec.js` will catch.
 
 0. Fetch the wiki pages and images with `scripts/fetch-wiki.js` rather than by hand, so requests
    go out one at a time and are never repeated:
@@ -95,6 +132,10 @@ always — Small Shield's is `smallshield.png`).
      `{ type: "icon", icon, value }` (`value` optional — a fixed number, or a status name, printed
      right after the icon in its tint), `{ type: "dieSlot" }` (one per `[]` in the game's effect
      text), and `{ type: "lineBreak" }`.
+   - `upgrade` — what changes when the player upgrades it, as a partial override merged over the
+     entry: only the fields that actually change, and `{}` if the upgrade changes nothing the card
+     shows. Allowed keys are `size`, `requirement`, `bonusDieFace` and `effect`; the "+" on the name
+     and the ribbon are the renderer's job, and the colors never change. See "Upgraded cards".
    - If the equipment uses an icon not yet in `ICON_SYMBOLS` in `js/icons.js` (currently
      `sword`, `shield`, `fire`, `poison`, `weaken`, `thorns`, `shock`, `ice`, `heal`,
      `drain`, `blind`, `lock`, `gold`, `vanish`, `confuse`), add a hand-drawn 24×24 symbol
@@ -108,9 +149,10 @@ always — Small Shield's is `smallshield.png`).
    - `extraEquipment: [{ heading, equipment }]` — extra headed sections of cards the player may
      also see (a random loadout's possibilities, or cards gained mid-fight).
 3. Copy any page in `enemies/` to `enemies/<enemyId>.html` and swap its `<title>` and the
-   `renderEnemyPage("...")` call in its last `<script>` for the new enemy's id. `js/render.js`
-   doesn't render anything by itself — each page calls it. The picker lists the new enemy
-   automatically; `js/render.js` and both stylesheets are enemy-agnostic.
+   `renderEnemyPage("...")` call in its last `<script>` for the new enemy's id. Do the same from
+   `equipment/` for any new equipment, swapping the `renderEquipmentPage("...")` call.
+   `js/render.js` doesn't render anything by itself — each page calls it. The picker and the
+   search list the new entry automatically; `js/render.js` and both stylesheets are content-agnostic.
 4. Run the tests (see "Tests"). The page, data and visual tests loop over the data, so a new enemy
    and its cards are covered without writing a new test: errors, stats, sections, card names,
    effect text, card shape and fit, page/data consistency, and a new snapshot per new card
@@ -119,6 +161,10 @@ always — Small Shield's is `smallshield.png`).
    width: shape, header/body colors, die-slot style and hatching, die-face and pips, icons and
    their tints, and wording/line breaks/placement. Do this *before* accepting the card's new
    snapshot — a snapshot only catches later *changes*, not a card that was wrong from the start.
+6. For an upgraded card there is no wiki image to check against, so check the *rule* instead: render
+   Battle Axe and Snowball (both in `EQUIPMENT` and both covered by `art-references/`) beside their
+   screenshots at the same width. Those two between them exercise a size change, an added die-face
+   and an extra effect line.
 
 ## Card geometry
 
@@ -149,10 +195,46 @@ wiki card images and averaged across cards (they agree to within a percent or so
   apart, joined by two grey (`#8c8b8b`) bars **7.2%** wide and **2.8%** tall.
 - A title too long for the header (e.g. Two Handed Sword) is shrunk to fit, as the art does.
 
-The one remaining deliberate difference: the art uses a condensed hand-lettered font that the site
+One deliberate difference throughout: the art uses a condensed hand-lettered font that the site
 doesn't have (it avoids embedding assets), so titles and text look wider and rounder. The
 page tests check that every title still fits on one line and no effect line wraps beyond the card's
 own line breaks.
+
+## Upgraded cards
+
+An `equipment/<id>.html` page draws the card twice: once from the entry, once with its `upgrade`
+override applied. The upgraded one gets a `+` on its title and wears the game's ribbon banner. Its
+shape comes from the resolved `size`, so an upgrade that shrinks the equipment (Battle Axe, Hammer,
+Electromagnet) renders a size-1 card beside a size-2 one.
+
+The ribbon was traced from the four screenshots in `art-references/` — a gold, a red, a green and
+a blue card, which is what settled the colour rule. Unlike `.wiki-cache/`, that directory is
+committed: it is the only reference for any of this, since the wiki has no upgraded card art.
+
+- **Colour is derived from the card, not fixed.** The ribbon is the card's own `color.body`
+  lightened by 8% in HSL, hue and saturation held — `ribbonColor()` in `js/render.js`, set on the
+  card as `--card-ribbon`. Anchor: Battle Axe's `#9f7226` gives `#c08a2e` against the art's
+  `#c0882f`. Computed rather than stored, so every card gets a ribbon without 122 more sampled hexes.
+- **The band and its tails are one flat colour.** The only other tone is the shadow the ribbon casts,
+  which measured as the body multiplied by ~0.66 on all four cards, so it is drawn as translucent
+  black (34%) and holds over any palette. The band is drawn over its own shadow so it casts one onto
+  the tails too — without that the band and tails read as a single blob.
+- **Geometry is in card-width units**, like everything else on a card: the SVG's viewBox is
+  `0 -2 100 29`, so a path coordinate is a percentage of the card's width with y measured from the
+  card's top edge. It measured identically on Battle Axe and Bump. The band's top edge arcs from
+  ~6.4 at x13 up to ~-3 at centre; its bottom runs ~12.5 at centre (just past the 12.9 header band)
+  down to ~15.5 at the ends. The swallowtails run from x7 and x93 back under the band, hanging to
+  y ~25.5.
+- **The title prints on the band**, which is narrower than the header, so
+  `.equipment-card--upgraded .equipment-card__header` has a wider padding — that alone is enough
+  for the existing `fitCardTitles()` to shrink a long "+" title to the band rather than the card.
+- A card that gains a `countdown` on upgrade (Dire Wolf Howl) has no sampled `slot` colour for the
+  countdown box, so it falls back to the card's body colour.
+
+Two more deliberate differences from the art: the card clips the ~1.6% of the ribbon's crown that
+overhangs its top edge (`.equipment-card` has `overflow: hidden`, which the card's rounded corners
+and the content-fit tests both depend on), and the ribbon's colour follows `js/data.js`'s
+wiki-sampled body colour, which for some cards is not the colour an in-game screenshot shows.
 
 ## Die-slot vs. die-face
 
@@ -192,7 +274,7 @@ npx playwright install --with-deps chromium   # one-time; downloads the browser 
 npm test
 ```
 
-Five kinds of test, all under `tests/`. `tests/helpers.js` loads `js/data.js` in Node, so the
+Seven spec files, all under `tests/`. `tests/helpers.js` loads `js/data.js` in Node, so the
 tests read enemy/equipment data from the same source as the pages instead of a copied list.
 
 - **`unit.spec.js`** — calls the pure DOM-building functions from `js/render.js` directly (e.g.
@@ -207,15 +289,33 @@ tests read enemy/equipment data from the same source as the pages instead of a c
   Hothead and Space Marine, which between them use the original die-slot styles; the newer
   captioned, doubles and multi-socket styles are covered by `unit.spec.js` and the card
   snapshots. Also runs once.
-- **`picker-page.spec.js`** — loads `index.html`: one headed section per level then Bosses, in
+- **`picker-page.spec.js`** — loads `enemies.html`: one headed section per level then Bosses, in
   order and split by dividers, each with the right links in data order; every enemy linked exactly
   once; clicking each link then its back-link round-trips. Also runs once.
-- **`data.spec.js`** — checks `js/data.js` and `enemies/` in Node: levels, equipment references,
-  every equipment entry used by some enemy, every icon and requirement type drawable, and one page
-  per enemy calling `renderEnemyPage` with its own id. Also runs once.
-- **`visual.spec.js`** — pixel snapshot tests (`toHaveScreenshot`) of **every equipment card**
-  (one per id in `EQUIPMENT`, named `<kebab-case id>-card.png`), full pages (Frog, Magician,
-  Hothead, Keymaster, Scathach, the picker), and close-ups (the die-face pips, the header's dice
+- **`home-page.spec.js`** — loads `index.html`: exactly the two section cards, in order, each
+  round-tripping to its page and back via that page's back-link.
+- **`search-page.spec.js`** — loads `equipment.html`: every equipment listed once in data order;
+  filtering by a case-insensitive substring, including mid-name; the empty state and the live count;
+  clearing restores everything. Round-trips a handful of representative links rather than all 122,
+  which would dominate the suite's runtime — the full link list is asserted separately.
+- **`equipment-page.spec.js`** — the equipment counterpart of `page.spec.js`. For *every* entry in
+  `EQUIPMENT`: both cards render with no console errors or external requests, the regular one matches
+  the entry and the upgraded one matches the entry with its `upgrade` applied (name, effect text,
+  its size's aspect ratio), only the upgraded card has the ribbon, and both cards' content fits the
+  same way the enemy pages' does. Then the upgrades that change a card's layout — Battle Axe's
+  size, Snowball's die-face, Ice Age's sockets, Tower Shield's dropped requirement.
+- **`data.spec.js`** — checks `js/data.js`, `enemies/` and `equipment/` in Node: levels, equipment
+  references, every equipment entry used by some enemy, every icon and requirement type drawable in
+  **both** a card's forms, every entry carrying an `upgrade` override whose keys are ones the card
+  shows and which never restates a value the base already has, one page per enemy calling
+  `renderEnemyPage` and one per equipment calling `renderEquipmentPage` with its own id, and every
+  enemy page linking back to `enemies.html`. Also runs once.
+- **`visual.spec.js`** — pixel snapshot tests (`toHaveScreenshot`) of **every equipment card** in
+  both forms: the regular one from the enemy page that carries it (`<kebab-case id>-card.png`) and
+  the upgraded one from its equipment page (`<kebab-case id>-card-upgraded.png`). Plus full pages
+  (Frog, Magician, Hothead, Keymaster, Scathach, the picker, the home page, the search page filtered
+  and unfiltered, and the Battle Axe and Snowball equipment pages), a close-up of the upgrade ribbon,
+  and close-ups (the die-face pips, the header's dice
   icon, and an effect line for each tinted icon). Close-ups exist because a larger diff can average a small regression below the
   diff threshold (a whole card didn't register an icon changing color); a tight crop on just that
   element can't hide it. This one runs twice, once per viewport project (`visual-mobile` using a

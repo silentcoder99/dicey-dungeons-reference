@@ -308,3 +308,122 @@ test.describe("injectIconSprite", () => {
     expect(result.symbols).toEqual(Object.keys(ICON_SYMBOLS).map((name) => `icon-${name}`));
   });
 });
+
+test.describe("ribbonColor", () => {
+  // The anchor: Battle Axe's body color, whose ribbon we can read off art-references/.
+  test("lightens the card's body color, holding hue and saturation", async ({ page }) => {
+    const result = await page.evaluate(() => ({
+      battleAxe: ribbonColor("#9f7226"),
+      grey: ribbonColor("#808080"),
+      white: ribbonColor("#ffffff"),
+      black: ribbonColor("#000000"),
+    }));
+    expect(result.battleAxe).toBe("#c08a2e");
+    expect(result.grey).toBe("#949494");
+    expect(result.white).toBe("#ffffff");
+    expect(result.black).toBe("#141414");
+  });
+
+  test("round-trips a color it cannot lighten any further", async ({ page }) => {
+    const hex = await page.evaluate(() => ribbonColor(ribbonColor("#ffffff")));
+    expect(hex).toBe("#ffffff");
+  });
+});
+
+test.describe("resolveEquipment", () => {
+  test("returns the entry untouched unless asked for the upgrade", async ({ page }) => {
+    const same = await page.evaluate(
+      () => resolveEquipment("battleAxe") === EQUIPMENT.battleAxe
+    );
+    expect(same).toBe(true);
+  });
+
+  test("applies the override and adds the +, leaving the entry alone", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const upgraded = resolveEquipment("battleAxe", { upgraded: true });
+      return {
+        name: upgraded.name,
+        size: upgraded.size,
+        baseName: EQUIPMENT.battleAxe.name,
+        baseSize: EQUIPMENT.battleAxe.size,
+        // Not overridden, so it comes through from the base entry.
+        requirement: upgraded.requirement,
+      };
+    });
+    expect(result).toEqual({
+      name: "Battle Axe+",
+      size: 1,
+      baseName: "Battle Axe",
+      baseSize: 2,
+      requirement: { type: "max", value: 4 },
+    });
+  });
+
+  test("an empty override still yields a card, differing only by the +", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const saved = EQUIPMENT.broadsword.upgrade;
+      EQUIPMENT.broadsword.upgrade = {};
+      const upgraded = resolveEquipment("broadsword", { upgraded: true });
+      EQUIPMENT.broadsword.upgrade = saved;
+      return { name: upgraded.name, size: upgraded.size, die: upgraded.bonusDieFace };
+    });
+    expect(result).toEqual({ name: "Broadsword+", size: 2, die: 2 });
+  });
+});
+
+test.describe("createUpgradeRibbon", () => {
+  test("draws each shape twice, shadow first, in card-width units", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const svg = createUpgradeRibbon();
+      return {
+        className: svg.getAttribute("class"),
+        viewBox: svg.getAttribute("viewBox"),
+        hidden: svg.getAttribute("aria-hidden"),
+        groups: [...svg.children].map((g) => ({
+          className: g.getAttribute("class"),
+          paths: g.children.length,
+          mirrored: [...g.children].filter((p) => p.getAttribute("transform")).length,
+        })),
+      };
+    });
+    expect(result.className).toBe("upgrade-ribbon");
+    expect(result.viewBox).toBe("0 -2 100 29");
+    expect(result.hidden).toBe("true");
+    // Tail shadow, tails, band shadow, band -- one tail mirrored to the card's other side.
+    expect(result.groups).toEqual([
+      { className: "upgrade-ribbon__shadow", paths: 2, mirrored: 1 },
+      { className: "upgrade-ribbon__body", paths: 2, mirrored: 1 },
+      { className: "upgrade-ribbon__shadow", paths: 1, mirrored: 0 },
+      { className: "upgrade-ribbon__body", paths: 1, mirrored: 0 },
+    ]);
+  });
+});
+
+test.describe("renderEquipmentCard upgraded", () => {
+  test("only the upgraded card carries the ribbon, the + and the ribbon color", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const read = (card) => ({
+        ribbons: card.querySelectorAll(".upgrade-ribbon").length,
+        upgraded: card.classList.contains("equipment-card--upgraded"),
+        title: card.querySelector(".equipment-card__header").textContent,
+        ribbonColor: card.style.getPropertyValue("--card-ribbon"),
+      });
+      return {
+        base: read(renderEquipmentCard("battleAxe")),
+        upgraded: read(renderEquipmentCard("battleAxe", { upgraded: true })),
+      };
+    });
+    expect(result.base).toEqual({
+      ribbons: 0,
+      upgraded: false,
+      title: "Battle Axe",
+      ribbonColor: "#c08a2e",
+    });
+    expect(result.upgraded).toEqual({
+      ribbons: 1,
+      upgraded: true,
+      title: "Battle Axe+",
+      ribbonColor: "#c08a2e",
+    });
+  });
+});

@@ -24,4 +24,33 @@ function pageEquipment(enemy) {
   return [enemy.equipment, ...(enemy.extraEquipment || []).map((g) => g.equipment)].flat();
 }
 
-module.exports = { pageUrl, EQUIPMENT, ENEMIES, ENEMY_IDS, PICKER_GROUPS, pageEquipment };
+const EQUIPMENT_IDS = Object.keys(EQUIPMENT);
+
+// The effect line's visible text, as built from the data's tokens.
+function expectedEffectText(tokens) {
+  return tokens
+    .map((t) => (t.type === "text" ? t.text : t.value !== undefined ? String(t.value) : ""))
+    .join("");
+}
+
+// The upgraded form of an equipment entry, worked out here independently of render.js: the base
+// entry with its `upgrade` override applied and a "+" on the name.
+function resolveUpgrade(equipmentId) {
+  const base = EQUIPMENT[equipmentId];
+  return { ...base, ...base.upgrade, name: `${base.name}+` };
+}
+
+const UPGRADE_KEYS = ["size", "requirement", "bonusDieFace", "effect"];
+
+module.exports = {
+  pageUrl,
+  EQUIPMENT,
+  ENEMIES,
+  ENEMY_IDS,
+  EQUIPMENT_IDS,
+  PICKER_GROUPS,
+  pageEquipment,
+  expectedEffectText,
+  resolveUpgrade,
+  UPGRADE_KEYS,
+};

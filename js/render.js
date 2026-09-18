@@ -171,15 +171,118 @@ function renderEffectTokens(tokens) {
   return frag;
 }
 
-function renderEquipmentCard(equipmentId) {
-  const data = EQUIPMENT[equipmentId];
+// ---------- Upgraded equipment ----------
+
+// An upgraded card is the base entry with its `upgrade` override applied and a "+" on the name.
+// Only the fields an upgrade actually changes are listed in `upgrade` (see data.js), so an empty
+// override still yields a valid upgraded card -- one that differs from the base only by the "+"
+// and the ribbon.
+function resolveEquipment(equipmentId, { upgraded = false } = {}) {
+  const base = EQUIPMENT[equipmentId];
+  if (!upgraded) return base;
+  return { ...base, ...base.upgrade, name: `${base.name}+` };
+}
+
+// The art draws the upgrade ribbon in the card's own body color, one shade lighter: hue and
+// saturation held, lightness +8. Measured across the four cards in art-references/ -- Battle Axe's
+// body #9f7226 gives #c08a2e against the art's #c0882f. Computed rather than stored so every card
+// gets a ribbon without 122 more hand-sampled hex values.
+const RIBBON_LIGHTEN_PERCENT = 8;
+
+function ribbonColor(bodyHex) {
+  const [h, s, l] = rgbToHsl(bodyHex);
+  return hslToHex(h, s, Math.min(100, l + RIBBON_LIGHTEN_PERCENT));
+}
+
+function rgbToHsl(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l * 100];
+  const d = max - min;
+  const s = d / (l > 0.5 ? 2 - max - min : max + min);
+  const h =
+    max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h * 60, s * 100, l * 100];
+}
+
+function hslToHex(h, s, l) {
+  const [hue, sat, lum] = [h / 360, s / 100, l / 100];
+  const q = lum < 0.5 ? lum * (1 + sat) : lum + sat - lum * sat;
+  const p = 2 * lum - q;
+  const channel = (t) => {
+    t = (t + 1) % 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const toHex = (v) => Math.round(v * 255).toString(16).padStart(2, "0");
+  if (sat === 0) return `#${toHex(lum).repeat(3)}`;
+  return `#${toHex(channel(hue + 1 / 3))}${toHex(channel(hue))}${toHex(channel(hue - 1 / 3))}`;
+}
+
+// The ribbon banner an upgraded card wears over its header band, traced from art-references/. The
+// viewBox is in card-width units, so these coordinates are literally the percentages measured from
+// the art (y from the card's top edge) and the ribbon scales with the card like everything else on
+// it.
+const RIBBON_BAND_PATH = "M13,6.4 Q50,-12.5 87,6.4 L87,15.5 Q50,9.5 13,15.5 Z";
+// A swallowtail hangs behind each end of the band: out to a point, a notch, then a lower point.
+// Drawn once for the left end and mirrored for the right. Its inner end runs well under the band,
+// which covers it.
+const RIBBON_TAIL_PATH = "M25,9 L7,17.6 L10.5,20 L12,25.5 L21,19.5 L25,13 Z";
+// Light comes from the top-right in the art, so the ribbon's shadow falls down and to the left.
+const RIBBON_SHADOW_OFFSET = "translate(-0.8,1.2)";
+
+function createUpgradeRibbon() {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("class", "upgrade-ribbon");
+  svg.setAttribute("viewBox", "0 -2 100 29");
+  svg.setAttribute("preserveAspectRatio", "xMidYMin meet");
+  svg.setAttribute("aria-hidden", "true");
+
+  const group = (className, transform, paths) => {
+    const g = document.createElementNS(SVG_NS, "g");
+    g.setAttribute("class", className);
+    if (transform) g.setAttribute("transform", transform);
+    for (const [d, mirrored] of paths) {
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", d);
+      if (mirrored) path.setAttribute("transform", "translate(100,0) scale(-1,1)");
+      g.appendChild(path);
+    }
+    return g;
+  };
+
+  const tails = [[RIBBON_TAIL_PATH, false], [RIBBON_TAIL_PATH, true]];
+  const band = [[RIBBON_BAND_PATH, false]];
+
+  // Shadow, shape, shadow, shape: the band has to cast its own shadow onto the tails, or the two
+  // read as one blob rather than a band with tails hanging behind it.
+  svg.append(
+    group("upgrade-ribbon__shadow", RIBBON_SHADOW_OFFSET, tails),
+    group("upgrade-ribbon__body", null, tails),
+    group("upgrade-ribbon__shadow", RIBBON_SHADOW_OFFSET, band),
+    group("upgrade-ribbon__body", null, band)
+  );
+  return svg;
+}
+
+function renderEquipmentCard(equipmentId, { upgraded = false } = {}) {
+  const data = resolveEquipment(equipmentId, { upgraded });
 
   const card = document.createElement("article");
   card.className = `equipment-card equipment-card--size-${data.size}`;
   if ([].concat(data.requirement).some(hasCaption)) card.classList.add("equipment-card--captioned");
   card.style.setProperty("--card-accent", data.color.header);
   card.style.setProperty("--card-body", data.color.body);
+  card.style.setProperty("--card-ribbon", ribbonColor(data.color.body));
   if (data.color.slot) card.style.setProperty("--card-slot", data.color.slot);
+  if (upgraded) {
+    card.classList.add("equipment-card--upgraded");
+    card.appendChild(createUpgradeRibbon());
+  }
 
   const header = document.createElement("header");
   header.className = "equipment-card__header";
@@ -352,11 +455,11 @@ function renderEnemyPicker() {
     section.appendChild(heading);
 
     const list = document.createElement("ul");
-    list.className = "enemy-picker";
+    list.className = "picker-list enemy-picker";
     for (const enemyId of group.enemyIds) {
       const item = document.createElement("li");
       const link = document.createElement("a");
-      link.className = "enemy-picker__card";
+      link.className = "picker-card enemy-picker__card";
       link.href = `enemies/${enemyId}.html`;
       link.textContent = ENEMIES[enemyId].name;
       item.appendChild(link);
@@ -365,4 +468,106 @@ function renderEnemyPicker() {
     section.appendChild(list);
     root.appendChild(section);
   }
+}
+
+// ---------- Equipment reference pages ----------
+
+// A card's upgrade is worth showing even when it changes nothing visible, but two identical cards
+// read as a bug, so say so.
+const NO_VISIBLE_UPGRADE_NOTE = "Upgrading doesn't change this card.";
+
+function createUpgradeArrow() {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("class", "upgrade-pair__arrow");
+  svg.setAttribute("viewBox", "0 0 24 18");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS(SVG_NS, "path");
+  path.setAttribute("d", "M0,6 H13 V0 L24,9 L13,18 V12 H0 Z");
+  svg.appendChild(path);
+  return svg;
+}
+
+function createUpgradePairSide(heading, equipmentId, { upgraded }) {
+  const side = document.createElement("div");
+  side.className = "upgrade-pair__side";
+  const title = document.createElement("h2");
+  title.className = "upgrade-pair__heading";
+  title.textContent = heading;
+  side.append(title, renderEquipmentCard(equipmentId, { upgraded }));
+  return side;
+}
+
+function renderEquipmentPage(equipmentId) {
+  const equipment = EQUIPMENT[equipmentId];
+  const root = document.getElementById("equipment-root");
+
+  injectIconSprite();
+
+  const name = document.createElement("h1");
+  name.className = "equipment-page__name";
+  name.textContent = equipment.name;
+  root.appendChild(name);
+
+  const pair = document.createElement("div");
+  pair.className = "upgrade-pair";
+  pair.append(
+    createUpgradePairSide("Regular", equipmentId, { upgraded: false }),
+    createUpgradeArrow(),
+    createUpgradePairSide("Upgraded", equipmentId, { upgraded: true })
+  );
+  root.appendChild(pair);
+
+  if (Object.keys(equipment.upgrade).length === 0) {
+    const note = document.createElement("p");
+    note.className = "upgrade-pair__note";
+    note.textContent = NO_VISIBLE_UPGRADE_NOTE;
+    root.appendChild(note);
+  }
+
+  fitCardTitles(root);
+}
+
+// Links are relative to the search page (equipment.html at the repo root).
+function renderEquipmentSearch() {
+  const root = document.getElementById("equipment-search-root");
+  const input = document.getElementById("equipment-search-input");
+
+  const status = document.createElement("p");
+  status.className = "equipment-search__status";
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+
+  const list = document.createElement("ul");
+  list.className = "picker-list equipment-picker";
+
+  const items = Object.entries(EQUIPMENT).map(([equipmentId, equipment]) => {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.className = "picker-card equipment-picker__card";
+    link.href = `equipment/${equipmentId}.html`;
+    link.textContent = equipment.name;
+    item.appendChild(link);
+    list.appendChild(item);
+    return { item, name: equipment.name.toLowerCase() };
+  });
+
+  root.append(status, list);
+
+  // Matching hides non-matching items rather than rebuilding the list: cheaper, and every link
+  // keeps its identity across keystrokes.
+  function applyQuery() {
+    const query = input.value.trim().toLowerCase();
+    let matches = 0;
+    for (const { item, name } of items) {
+      const hit = name.includes(query);
+      item.hidden = !hit;
+      if (hit) matches++;
+    }
+    status.textContent = matches === 0
+      ? `No equipment matches "${input.value.trim()}".`
+      : `${matches} of ${items.length} shown`;
+  }
+
+  input.addEventListener("input", applyQuery);
+  applyQuery();
 }

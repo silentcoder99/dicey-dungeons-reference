@@ -1,6 +1,6 @@
 // Structural/content assertions against the actually-rendered enemy pages.
 const { test, expect } = require("@playwright/test");
-const { pageUrl, EQUIPMENT, ENEMIES, ENEMY_IDS, pageEquipment } = require("./helpers");
+const { pageUrl, EQUIPMENT, ENEMIES, ENEMY_IDS, pageEquipment, expectedEffectText } = require("./helpers");
 
 // Opens a page, recording console/page errors and every requested URL.
 async function openEnemyPage(page, enemyId) {
@@ -15,13 +15,6 @@ async function openEnemyPage(page, enemyId) {
   await page.goto(pageUrl(`enemies/${enemyId}.html`));
   await page.waitForSelector(".equipment-section");
   return { consoleErrors, requests };
-}
-
-// The effect line's visible text, as built from the data's tokens.
-function expectedEffectText(tokens) {
-  return tokens
-    .map((t) => (t.type === "text" ? t.text : t.value !== undefined ? String(t.value) : ""))
-    .join("");
 }
 
 test.describe("Every enemy page", () => {
@@ -67,7 +60,7 @@ test.describe("Every enemy page", () => {
         );
       }
 
-      await expect(page.locator('a.back-link[href="../index.html"]')).toHaveCount(1);
+      await expect(page.locator('a.back-link[href="../enemies.html"]')).toHaveCount(1);
 
       expect(consoleErrors).toEqual([]);
       expect(requests.filter((url) => !url.startsWith("file://"))).toEqual([]);

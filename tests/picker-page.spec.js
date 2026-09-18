@@ -1,4 +1,4 @@
-// Structural assertions against the enemy picker (index.html), plus navigation to and from it.
+// Structural assertions against the enemy picker (enemies.html), plus navigation to and from it.
 const { test, expect } = require("@playwright/test");
 const { pageUrl, ENEMIES, ENEMY_IDS, PICKER_GROUPS } = require("./helpers");
 
@@ -15,13 +15,19 @@ test.describe("Enemy picker", () => {
     page.on("pageerror", (err) => consoleErrors.push(String(err)));
     page.on("request", (req) => requests.push(req.url()));
 
-    await page.goto(pageUrl("index.html"));
+    await page.goto(pageUrl("enemies.html"));
     await page.waitForSelector(".enemy-picker__card");
   });
 
   test("has no console or page errors, and loads no external resources", async () => {
     expect(consoleErrors).toEqual([]);
     expect(requests.filter((url) => !url.startsWith("file://"))).toEqual([]);
+  });
+
+  test("back-link returns to the site root", async ({ page }) => {
+    await expect(page.locator(".back-link")).toHaveAttribute("href", "index.html");
+    await page.locator(".back-link").click();
+    await expect(page).toHaveURL(pageUrl("index.html"));
   });
 
   test("groups enemies into headed sections by level, then bosses, split by dividers", async ({
@@ -34,7 +40,7 @@ test.describe("Enemy picker", () => {
     );
     // Dividers sit only between sections: section, hr, section, hr, ..., section.
     const children = await page
-      .locator("#picker-root > :not(h1)")
+      .locator("#picker-root > :not(h1):not(.back-link)")
       .evaluateAll((els) => els.map((el) => el.tagName.toLowerCase()));
     expect(children).toEqual(PICKER_GROUPS.flatMap((_, i) => (i ? ["hr", "section"] : ["section"])));
 
@@ -71,7 +77,7 @@ test.describe("Enemy picker", () => {
       await expect(page.locator(".enemy-header__name")).toHaveText(ENEMIES[enemyId].name);
 
       await page.locator(".back-link").click();
-      await expect(page).toHaveURL(pageUrl("index.html"));
+      await expect(page).toHaveURL(pageUrl("enemies.html"));
       await page.waitForSelector(".enemy-picker__card");
     }
   });
