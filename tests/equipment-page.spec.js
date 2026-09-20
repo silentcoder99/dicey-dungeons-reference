@@ -114,6 +114,30 @@ test.describe("Every equipment page", () => {
   }
 });
 
+// A condition a card prints outside its own frame lives in the entry's `note` and is shown under
+// the pair, not on the card -- so the card can't be read as saying something the art doesn't.
+test.describe("A card's note", () => {
+  test("every entry with a note shows it under the pair, and no other page has one", async ({
+    page,
+  }) => {
+    const withNote = EQUIPMENT_IDS.filter((id) => EQUIPMENT[id].note);
+    expect(withNote.length, "some entry carries a note").toBeGreaterThan(0);
+
+    for (const id of withNote) {
+      await page.goto(pageUrl(`equipment/${id}.html`));
+      await page.waitForSelector(".equipment-card");
+      await expect(page.locator(".upgrade-pair__note--condition")).toHaveText(EQUIPMENT[id].note);
+      // The note belongs to the page, not to either card.
+      await expect(page.locator(".equipment-card .upgrade-pair__note--condition")).toHaveCount(0);
+    }
+
+    const without = EQUIPMENT_IDS.find((id) => !EQUIPMENT[id].note);
+    await page.goto(pageUrl(`equipment/${without}.html`));
+    await page.waitForSelector(".equipment-card");
+    await expect(page.locator(".upgrade-pair__note--condition")).toHaveCount(0);
+  });
+});
+
 test.describe("Upgrades that change the card's shape or sockets", () => {
   test("Battle Axe+ is a size-1 card where Battle Axe is size 2", async ({ page }) => {
     await page.goto(pageUrl("equipment/battleAxe.html"));

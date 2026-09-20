@@ -168,13 +168,16 @@ Effect text is limited to **two lines**: a third overflows the body panel on a s
      `{ type: "icon", icon, value }` (`value` optional — a fixed number, or a status name, printed
      right after the icon in its tint), `{ type: "dieSlot" }` (one per `[]` in the game's effect
      text), and `{ type: "lineBreak" }`.
+   - `note` (optional) — one line of prose shown under the pair on that equipment's own page,
+     for a condition the card image prints *outside* the card frame, which the card itself has
+     nowhere to show: a Witch spell's spellbook cast cost, for instance. Not shown on the cards.
    - `upgrade` — what changes when the player upgrades it, as a partial override merged over the
      entry: only the fields that actually change, and `{}` if the upgrade changes nothing the card
      shows. Allowed keys are `size`, `requirement`, `bonusDieFace` and `effect`; the "+" on the name
      and the ribbon are the renderer's job, and the colors never change. See "Upgraded cards".
    - If the equipment uses an icon not yet in `ICON_SYMBOLS` in `js/icons.js` (currently
-     `sword`, `shield`, `fire`, `poison`, `weaken`, `thorns`, `shock`, `ice`, `heal`,
-     `drain`, `blind`, `lock`, `gold`, `vanish`, `confuse`), add a hand-drawn 24×24 symbol
+     `sword`, `shield`, `armor`, `fire`, `poison`, `weaken`, `thorns`, `shock`, `ice`,
+     `heal`, `drain`, `blind`, `lock`, `gold`, `vanish`, `confuse`, `dice`), add a hand-drawn 24×24 symbol
      there. It's injected into every page as a hidden sprite. If the card tints the icon, also add a
      `.glyph--<icon>, .effect-value--<icon>` color rule in `css/equipment-card.css`.
 3. Add an entry to `ENEMIES` in `js/data.js`: `name`, `level` (1–5, or `boss: true` instead),
@@ -332,23 +335,26 @@ tests read enemy/equipment data from the same source as the pages instead of a c
   round-tripping to its page and back via that page's back-link.
 - **`search-page.spec.js`** — loads `equipment.html`: every equipment listed once in data order;
   filtering by a case-insensitive substring, including mid-name; the empty state and the live count;
-  clearing restores everything. Round-trips a handful of representative links rather than all 122,
-  which would dominate the suite's runtime — the full link list is asserted separately.
+  clearing restores everything. Round-trips a handful of representative links rather than every
+  one, which would dominate the suite's runtime — the full link list is asserted separately.
 - **`equipment-page.spec.js`** — the equipment counterpart of `page.spec.js`. For *every* entry in
   `EQUIPMENT`: both cards render with no console errors or external requests, the regular one matches
   the entry and the upgraded one matches the entry with its `upgrade` applied (name, effect text,
   its size's aspect ratio), only the upgraded card has the ribbon, and both cards' content fits the
-  same way the enemy pages' does. Then the upgrades that change a card's layout — Battle Axe's
-  size, Snowball's die-face, Ice Age's sockets, Tower Shield's dropped requirement.
+  same way the enemy pages' does. Then that every entry with a `note` prints it under the pair and
+  nowhere on either card, and the upgrades that change a card's layout — Battle Axe's size,
+  Snowball's die-face, Ice Age's sockets, Tower Shield's dropped requirement.
 - **`data.spec.js`** — checks `js/data.js`, `enemies/` and `equipment/` in Node: levels, equipment
-  references, every equipment entry used by some enemy, every icon and requirement type drawable in
+  references (but not the reverse — most of what a player buys is on no enemy page), every icon
+  and requirement type drawable in
   **both** a card's forms, every entry carrying an `upgrade` override whose keys are ones the card
   shows and which never restates a value the base already has, one page per enemy calling
   `renderEnemyPage` and one per equipment calling `renderEquipmentPage` with its own id, and every
   enemy page linking back to `enemies.html`. Also runs once.
 - **`visual.spec.js`** — pixel snapshot tests (`toHaveScreenshot`) of **every equipment card** in
-  both forms: the regular one from the enemy page that carries it (`<kebab-case id>-card.png`) and
-  the upgraded one from its equipment page (`<kebab-case id>-card-upgraded.png`). Plus full pages
+  both forms: the regular one from the enemy page that carries it, or from its own equipment page
+  when no enemy carries it (`<kebab-case id>-card.png`), and the upgraded one from its equipment
+  page (`<kebab-case id>-card-upgraded.png`). Plus full pages
   (Frog, Magician, Hothead, Keymaster, Scathach, the picker, the home page, the search page filtered
   and unfiltered, and the Battle Axe and Snowball equipment pages), a close-up of the upgrade ribbon,
   and close-ups (the die-face pips, the header's dice
@@ -364,8 +370,14 @@ intentionally alters appearance, review the diff Playwright reports, then regene
 with:
 
 ```bash
-npm run test:update-snapshots
+npx playwright test --update-snapshots=all
 ```
+
+Use `=all`, not the bare `npm run test:update-snapshots`. The plain flag only rewrites a baseline
+whose test *failed*, so any change small enough to pass under the 2% pixel threshold — two more
+rows in a long list, say — leaves a stale baseline behind, and later changes are then compared
+against the wrong picture. With `=all` every baseline is rewritten, and the ones that come back
+changed in `git status` are exactly the ones that really moved.
 
 Snapshot filenames encode the OS they were generated on (currently `linux`). Regenerating them on
 a different platform will produce differently-named baselines rather than overwrite the existing

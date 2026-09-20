@@ -39,6 +39,18 @@ const ICON_SYMBOLS = {
       <path d="M12 1l1.6 6 3.9-1.5-3.5 4.5v4l4.5 1.5-4.5 2-.8 5.5h-2.4l-.8-5.5-4.5-2 4.5-1.5v-4L6.5 5.5l3.9 1.5z"></path>
     </g>
   `,
+  // A die seen in three-quarter view, as Illuminate draws it: a filled hexagon silhouette with
+  // its three face edges and three pips punched back out (fill-rule: evenodd), so the card body
+  // shows through them the way the pips on a die-face do.
+  dice: `
+    <path fill-rule="evenodd" d="M12 2.2 21.5 7.6 21.5 16.4 12 21.8 2.5 16.4 2.5 7.6Z
+      M12.25 11.46 2.75 7.06 2.25 8.14 11.75 12.54Z
+      M11.75 11.46 21.25 7.06 21.75 8.14 12.25 12.54Z
+      M11.4 12.4h1.2v9h-1.2Z
+      M10.7 7.1a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 1 0-2.6 0Z
+      M6 14.2a1.2 1.2 0 1 0 2.4 0 1.2 1.2 0 1 0-2.4 0Z
+      M15.6 14.2a1.2 1.2 0 1 0 2.4 0 1.2 1.2 0 1 0-2.4 0Z"></path>
+  `,
   shock: `
     <path d="M15.2 1.5 4.5 13.6h6.3L8.4 22.5 19.5 9.8h-6.4l2.1-8.3z"></path>
   `,
