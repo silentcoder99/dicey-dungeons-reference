@@ -5,7 +5,8 @@
   "scripts": {
     "test": "playwright test",
     "test:update-snapshots": "playwright test --update-snapshots",
-    "fetch-wiki": "node scripts/fetch-wiki.js"
+    "fetch-wiki": "node scripts/fetch-wiki.js",
+    "sample-card": "node scripts/sample-card-colors.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"

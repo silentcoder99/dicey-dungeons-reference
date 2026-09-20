@@ -116,9 +116,26 @@ Effect text is limited to **two lines**: a third overflows the body panel on a s
      after 2, 5, 10, 20 and 30 minutes, then stops and lists what it didn't fetch. If that
      happens, try again later.
 
-1. Add an entry to `EQUIPMENT` in `js/data.js` for any new equipment:
-   - `color: { header, body }` — the two hex colors pixel-sampled from the card image. Cards
-     with a countdown requirement also need `slot`, the countdown box's fill color.
+1. Read the card's colors out of its image with `scripts/sample-card-colors.js` rather than
+   picking them by eye:
+
+   ```bash
+   npm run sample-card -- broadsword                      # a name under .wiki-cache/media/equipment/
+   npm run sample-card -- buckler --at 50,46              # the exact color at a point
+   npm run sample-card -- punchline --rect 5,40,20,70     # the commonest colors in a rectangle
+   ```
+
+   With no flags it prints the image's size, the card size its width/height ratio implies, and
+   the commonest color in the header band, the body panel, and the countdown box. Sampled this
+   way it reproduces the header of every existing card exactly and the body of all but the four
+   whose art bleeds through the panel — where the two body strips disagree, that's the tell, and
+   the flat panel color is the one to take. An image with chrome outside the card (a spellbook
+   bar, an activation panel, a "FINALE CARD" banner) needs `--rect`/`--at` against what the
+   image actually shows, since the default regions assume the image *is* the card.
+
+2. Add an entry to `EQUIPMENT` in `js/data.js` for any new equipment:
+   - `color: { header, body }` — the two hex colors sampled above. Cards with a countdown
+     requirement also need `slot`, the countdown box's fill color.
    - `size` — inventory footprint (not the number of dice it uses), 1 or 2. Also sets the card's
      shape: size-2 cards are the tall ones in the card art.
    - `requirement` — `null`, `{ type: "max", value: N }`, `{ type: "min", value: N }`,
@@ -141,27 +158,27 @@ Effect text is limited to **two lines**: a third overflows the body panel on a s
      `drain`, `blind`, `lock`, `gold`, `vanish`, `confuse`), add a hand-drawn 24×24 symbol
      there. It's injected into every page as a hidden sprite. If the card tints the icon, also add a
      `.glyph--<icon>, .effect-value--<icon>` color rule in `css/equipment-card.css`.
-2. Add an entry to `ENEMIES` in `js/data.js`: `name`, `level` (1–5, or `boss: true` instead),
+3. Add an entry to `ENEMIES` in `js/data.js`: `name`, `level` (1–5, or `boss: true` instead),
    `hp`, `diceCount`, `innateEffects` (array, empty if none), and `equipment` (array of equipment
    ids; repeat an id for multiple copies). Keep entries in the wiki's enemy-list order; the picker
    groups them by level in that order. Optionally:
    - `equipmentNote` — a note shown under the Equipment heading;
    - `extraEquipment: [{ heading, equipment }]` — extra headed sections of cards the player may
      also see (a random loadout's possibilities, or cards gained mid-fight).
-3. Copy any page in `enemies/` to `enemies/<enemyId>.html` and swap its `<title>` and the
+4. Copy any page in `enemies/` to `enemies/<enemyId>.html` and swap its `<title>` and the
    `renderEnemyPage("...")` call in its last `<script>` for the new enemy's id. Do the same from
    `equipment/` for any new equipment, swapping the `renderEquipmentPage("...")` call.
    `js/render.js` doesn't render anything by itself — each page calls it. The picker and the
    search list the new entry automatically; `js/render.js` and both stylesheets are content-agnostic.
-4. Run the tests (see "Tests"). The page, data and visual tests loop over the data, so a new enemy
+5. Run the tests (see "Tests"). The page, data and visual tests loop over the data, so a new enemy
    and its cards are covered without writing a new test: errors, stats, sections, card names,
    effect text, card shape and fit, page/data consistency, and a new snapshot per new card
    (generate it with `npm run test:update-snapshots`).
-5. **Spot-check every new card by eye against its wiki card image**, side by side at the same
+6. **Spot-check every new card by eye against its wiki card image**, side by side at the same
    width: shape, header/body colors, die-slot style and hatching, die-face and pips, icons and
    their tints, and wording/line breaks/placement. Do this *before* accepting the card's new
    snapshot — a snapshot only catches later *changes*, not a card that was wrong from the start.
-6. For an upgraded card there is no wiki image to check against, so check the *rule* instead: render
+7. For an upgraded card there is no wiki image to check against, so check the *rule* instead: render
    Battle Axe and Snowball (both in `EQUIPMENT` and both covered by `art-references/`) beside their
    screenshots at the same width. Those two between them exercise a size change, an added die-face
    and an extra effect line.
