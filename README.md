@@ -44,7 +44,26 @@ browser and checks both content/structure and visual appearance — see "Tests" 
   (e.g. `equipment/battleAxe.html`).
 
 Equipment the player can only get by stealing from an enemy is listed like everything else —
-several classes can steal, so every card in `EQUIPMENT` is one a player may end up holding.
+several classes can steal, so every card in `EQUIPMENT` is one a player may end up holding. Most
+of what a player buys, on the other hand, is carried by no enemy at all, so an `EQUIPMENT` entry
+that appears on no enemy page is normal.
+
+### Coverage
+
+Equipment is being added an episode at a time: episode 1 for every class, then episode 2, and so
+on. The **Jester is out of scope**, in every episode.
+
+Two kinds of card are deliberately left out, because the site would have to invent a layout rather
+than recreate one:
+
+- **Call for Backup** (five cards, Jester only) — character art with a button where the die slot
+  goes.
+- **Short Circuit** (Robot) — a card with no header band and four solid boxes in place of die
+  slots, over a second panel that carries the real effect.
+
+Where a card prints a condition *outside* the card frame — a Witch spell's spellbook cast cost, a
+Jester finale card's banner — the card is drawn as it is and the condition goes in the entry's
+`note`, shown under the pair on that equipment's page.
 
 Some enemies don't have a simple fixed loadout. Their pages show what the player can see:
 

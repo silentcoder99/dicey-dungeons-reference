@@ -3432,6 +3432,250 @@ const EQUIPMENT = {
       requirement: null,
     },
   },
+
+  // ---------- Robot, episode 1 ----------
+  // Short Circuit, the other card in this episode, isn't here: its art is a card with no header
+  // band and four solid boxes where the die slots go, which is a card shape this renderer doesn't
+  // have rather than a card it can draw. See README, "Not covered".
+
+  bumpblade: {
+    name: "Bumpblade",
+    color: { header: "#cdb94b", body: "#9d7837" },
+    size: 1,
+    requirement: { type: "max", value: 5 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword", value: 1 },
+      { type: "text", text: " damage, get" },
+      { type: "lineBreak" },
+      { type: "text", text: "new dice (value +1)" },
+    ],
+    // "damage" does not fit beside "bump dice" on one line, so this takes the "dmg" the game
+    // already uses on cards that are tight (Cauldron reads "Do @1 dmg, reroll dice").
+    upgrade: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 1 },
+        { type: "text", text: " dmg, bump dice" },
+        { type: "lineBreak" },
+        { type: "text", text: "(2 uses this turn)", muted: true },
+      ],
+    },
+  },
+  busterSword: {
+    name: "Buster Sword",
+    color: { header: "#7b7b7b", body: "#44423e" },
+    size: 1,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword" },
+      { type: "dieSlot" },
+      { type: "text", text: " damage," },
+      { type: "lineBreak" },
+      { type: "text", text: "immune to errors" },
+    ],
+    upgrade: {
+      bonusDieFace: 2,
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " + 2 damage," },
+        { type: "lineBreak" },
+        { type: "text", text: "immune to errors" },
+      ],
+    },
+  },
+  cheatCode: {
+    name: "Cheat Code",
+    color: { header: "#cdb94b", body: "#936a2a" },
+    size: 1,
+    requirement: { type: "odd" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Increase Jackpot" },
+      { type: "lineBreak" },
+      { type: "text", text: "range this turn" },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Increase Jackpot range" },
+        { type: "lineBreak" },
+        { type: "text", text: "by 2 this turn" },
+      ],
+    },
+  },
+  doppeldice: {
+    name: "Doppeldice",
+    color: { header: "#5da66f", body: "#366e44" },
+    size: 1,
+    requirement: { type: "max", value: 3 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Double dice value" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  fixedPayout: {
+    name: "Fixed Payout",
+    color: { header: "#cdb94b", body: "#9f7738" },
+    size: 1,
+    requirement: { type: "even" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Use an additional" },
+      { type: "lineBreak" },
+      { type: "text", text: "Jackpot ability" },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Use all additional" },
+        { type: "lineBreak" },
+        { type: "text", text: "Jackpot abilities" },
+      ],
+    },
+  },
+  forcefield: {
+    name: "Forcefield",
+    color: { header: "#ff9048", body: "#974b21" },
+    size: 2,
+    requirement: { type: "odd" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Add " },
+      { type: "icon", icon: "shield", value: 1 },
+      { type: "text", text: " shield," },
+      { type: "lineBreak" },
+      { type: "text", text: "add " },
+      { type: "icon", icon: "shield", value: 1 },
+      { type: "text", text: " each roll" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  heatSink: {
+    name: "Heat Sink",
+    color: { header: "#5da66f", body: "#2a6732" },
+    size: 1,
+    requirement: { type: "even" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Reduce CPU" },
+      { type: "lineBreak" },
+      { type: "text", text: "counter by " },
+      { type: "dieSlot" },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Reduce CPU" },
+        { type: "lineBreak" },
+        { type: "text", text: "counter by 7" },
+      ],
+    },
+  },
+  increment: {
+    name: "Increment",
+    color: { header: "#5da66f", body: "#2a6732" },
+    size: 1,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "CPU counter + 1" },
+      { type: "lineBreak" },
+      { type: "text", text: "(2 uses this turn)", muted: true },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "CPU counter + 1" },
+        { type: "lineBreak" },
+        { type: "text", text: "(Reuseable)", muted: true },
+      ],
+    },
+  },
+  mechanicalArm: {
+    name: "Mechanical Arm",
+    color: { header: "#fd5e6c", body: "#972e3e" },
+    size: 1,
+    requirement: { type: "even" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword", value: 1 },
+      { type: "text", text: " damage," },
+      { type: "lineBreak" },
+      { type: "text", text: "add " },
+      { type: "icon", icon: "sword", value: 1 },
+      { type: "text", text: " each roll" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  nudge: {
+    name: "Nudge",
+    color: { header: "#5da66f", body: "#296a3b" },
+    size: 1,
+    requirement: { type: "min", value: 2 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Dice value -1" },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Dice value -1" },
+        { type: "lineBreak" },
+        { type: "text", text: "(3 uses this turn)", muted: true },
+      ],
+    },
+  },
+  plasmaBlaster: {
+    name: "Plasma Blaster",
+    color: { header: "#fd5e6c", body: "#9e3746" },
+    size: 1,
+    requirement: { type: "max", value: 5 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword" },
+      { type: "dieSlot" },
+      { type: "text", text: " damage" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  ultimaWeapon: {
+    name: "Ultima Weapon",
+    color: { header: "#cdb94b", body: "#a9732c" },
+    size: 1,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword" },
+      { type: "dieSlot" },
+      { type: "text", text: " damage," },
+      { type: "lineBreak" },
+      { type: "text", text: "double on jackpot" },
+    ],
+    upgrade: {
+      bonusDieFace: 2,
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " + 2 damage," },
+        { type: "lineBreak" },
+        { type: "text", text: "double on jackpot" },
+      ],
+    },
+  },
 };
 
 // Enemies in the wiki's enemy-list order: by level, then bosses. The picker page groups them the
