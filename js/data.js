@@ -39,6 +39,23 @@
 // Requirements" / "Upgraded Size" rows of the wiki's equipment pages, but worded the way this card
 // words things rather than the way the wiki's prose does -- and the wiki text is not complete, so
 // check art-references/ wherever it covers the card (see README).
+//
+// Equipment `weaken`: the same thing mirrored -- what changes when the equipment is weakened, the
+// game's reverse of an upgrade. Same partial-override shape, same allowed keys, same `{}` for "the
+// card doesn't change", and the name's "-" and the drained colors are likewise the renderer's job.
+// Sourced from the "Weakened Effect" / "Weakened Requirements" rows, which a couple of pages label
+// "Downgraded" instead (Whip, Lament). Two things to watch, beyond the wording rule above:
+//   - Nothing anywhere has a "Weakened Size" row, so a weakened card is never a different shape.
+//   - Where a page carries a second stats table for the enemy/Jester version of the card, the first
+//     table is the one that counts, as it is for upgrades (Sneeze and Spike disagree between their
+//     two tables; both take the first).
+// Dire Wolf Howl is the one entry whose rows are qualified: its "Weakened Effect (if upgraded)"
+// describes weakening an already-upgraded card, which this site doesn't model, so only its
+// "Weakened Requirements (if not upgraded)" row applies. Mystery Box is the one entry the wiki
+// gives no weakened form at all, hence `weaken: {}`.
+//
+// There is no card image for a weakened card -- the wiki has one image per equipment, the regular
+// one -- so unlike everything else here these rows are the only reference there is.
 
 const EQUIPMENT = {
   broadsword: {
@@ -62,6 +79,9 @@ const EQUIPMENT = {
         { type: "text", text: " + 3 damage" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   smallShield: {
     name: "Small Shield",
@@ -83,6 +103,9 @@ const EQUIPMENT = {
         { type: "dieSlot" },
         { type: "text", text: " + 1 shield" },
       ],
+    },
+    weaken: {
+      requirement: { type: "max", value: 2 },
     },
   },
   shovel: {
@@ -110,6 +133,14 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "on even, inflict " },
         { type: "icon", icon: "weaken", value: 1 },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "weaken" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
       ],
     },
   },
@@ -141,6 +172,14 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Deal " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   magicMissile: {
     name: "Magic Missile",
@@ -160,6 +199,9 @@ const EQUIPMENT = {
         { type: "text", text: " damage" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   magicShield: {
     name: "Magic Shield",
@@ -178,6 +220,9 @@ const EQUIPMENT = {
         { type: "icon", icon: "shield", value: 4 },
         { type: "text", text: " shield" },
       ],
+    },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
     },
   },
   rayGun: {
@@ -201,6 +246,9 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "(3 uses this turn)", muted: true },
       ],
+    },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
     },
   },
   rosewoodSpear: {
@@ -231,6 +279,9 @@ const EQUIPMENT = {
         { type: "text", text: " thorns" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   slimeBall: {
     name: "Slime Ball",
@@ -250,6 +301,9 @@ const EQUIPMENT = {
         { type: "text", text: " poison" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   plasmaCannon: {
     name: "Plasma Cannon",
@@ -265,6 +319,13 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "countdown", value: 15 },
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 5 },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   woofWoofWoof: {
     name: "Woof Woof Woof",
@@ -275,6 +336,11 @@ const EQUIPMENT = {
     effect: [{ type: "text", text: "Repeat next action" }],
     upgrade: {
       requirement: { type: "countdown", value: 4 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "No effect" },
+      ],
     },
   },
   wolfPuppyBite: {
@@ -294,6 +360,9 @@ const EQUIPMENT = {
         { type: "icon", icon: "sword", value: 5 },
         { type: "text", text: " damage" },
       ],
+    },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
     },
   },
   avalanche: {
@@ -318,6 +387,9 @@ const EQUIPMENT = {
         { type: "text", text: "reroll with lower value" },
       ],
     },
+    weaken: {
+      requirement: { type: "min", value: 4 },
+    },
   },
   battleAxe: {
     name: "Battle Axe",
@@ -333,6 +405,9 @@ const EQUIPMENT = {
       { type: "text", text: " damage" },
     ],
     upgrade: { size: 1 },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   bearMaul: {
     name: "Bear Maul",
@@ -355,6 +430,15 @@ const EQUIPMENT = {
         { type: "text", text: " + 4 damage" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 4 },
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   bearPotion: {
     name: "Bear Potion",
@@ -371,6 +455,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 6 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Transform into a bear" },
+      ],
     },
   },
   beeSting: {
@@ -397,6 +486,13 @@ const EQUIPMENT = {
         { type: "text", text: "Inflict " },
         { type: "icon", icon: "shock", value: 1 },
         { type: "text", text: " shock" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 4 },
+        { type: "text", text: " damage" },
       ],
     },
   },
@@ -426,6 +522,13 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Lock " },
+        { type: "icon", icon: "lock", value: 1 },
+        { type: "text", text: " dice" },
+      ],
+    },
   },
   blight: {
     name: "Blight",
@@ -440,6 +543,15 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 18 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Increase " },
+        { type: "icon", icon: "poison" },
+        { type: "text", text: " poison" },
+        { type: "lineBreak" },
+        { type: "text", text: "by 50%" },
+      ],
     },
   },
   bloodSuck: {
@@ -456,6 +568,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "max", value: 3 },
     },
   },
   burningLight: {
@@ -477,6 +592,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   cactusShield: {
     name: "Cactus Shield",
@@ -493,6 +611,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
     },
   },
   cactusSpear: {
@@ -527,6 +648,9 @@ const EQUIPMENT = {
         { type: "text", text: " thorn" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   camouflage: {
     name: "Camouflage",
@@ -543,6 +667,13 @@ const EQUIPMENT = {
       effect: [
         { type: "text", text: "Blind " },
         { type: "icon", icon: "blind", value: 4 },
+        { type: "text", text: " dice" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Blind " },
+        { type: "icon", icon: "blind", value: 1 },
         { type: "text", text: " dice" },
       ],
     },
@@ -571,6 +702,9 @@ const EQUIPMENT = {
         { type: "text", text: " each use" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   cannonFire: {
     name: "Cannon Fire",
@@ -591,6 +725,17 @@ const EQUIPMENT = {
       effect: [
         { type: "text", text: "Deal " },
         { type: "icon", icon: "fire", value: 8 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "Burn " },
+        { type: "icon", icon: "fire", value: 1 },
+        { type: "text", text: " dice" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Deal " },
+        { type: "icon", icon: "fire", value: 3 },
         { type: "text", text: " damage" },
         { type: "lineBreak" },
         { type: "text", text: "Burn " },
@@ -625,6 +770,9 @@ const EQUIPMENT = {
         { type: "text", text: " each use" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   cauldron: {
     name: "Cauldron",
@@ -648,6 +796,13 @@ const EQUIPMENT = {
         { type: "text", text: "(2 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 1 },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   charge: {
     name: "Charge!",
@@ -665,6 +820,15 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "countdown", value: 9 },
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Bash with shield," },
+        { type: "lineBreak" },
+        { type: "text", text: "do " },
+        { type: "icon", icon: "shield", value: 0 },
+        { type: "text", text: " damage, lose it" },
+      ],
+    },
   },
   chocolateCookie: {
     name: "Chocolate Cookie",
@@ -677,6 +841,13 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 9 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Next equipment gets" },
+        { type: "lineBreak" },
+        { type: "text", text: "+1 use this turn" },
+      ],
     },
   },
   claw: {
@@ -698,6 +869,14 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "max", value: 5 },
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   crystallize: {
     name: "Crystallize",
@@ -715,6 +894,13 @@ const EQUIPMENT = {
         { type: "text", text: "Create a random" },
         { type: "lineBreak" },
         { type: "text", text: "upgraded crystal weapon" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Create a random" },
+        { type: "lineBreak" },
+        { type: "text", text: "weakened crystal weapon" },
       ],
     },
   },
@@ -735,6 +921,11 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Add 2x random status" },
+      ],
+    },
   },
   deepSeaHowl: {
     name: "Deep Sea Howl",
@@ -747,6 +938,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "even" },
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 4 }, { type: "exact", value: 4 }],
     },
   },
   direWolfHowl: {
@@ -762,6 +956,9 @@ const EQUIPMENT = {
     // sampled for it, the countdown box falls back to the card's body color.
     upgrade: {
       requirement: { type: "countdown", value: 10 },
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 6 }, { type: "exact", value: 6 }],
     },
   },
   dustCloud: {
@@ -792,6 +989,14 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   earthquake: {
     name: "Earthquake",
@@ -816,6 +1021,17 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "do " },
         { type: "icon", icon: "weaken", value: 9 },
+        { type: "text", text: " damage" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Weaken " },
+        { type: "icon", icon: "weaken", value: 2 },
+        { type: "text", text: " equipment," },
+        { type: "lineBreak" },
+        { type: "text", text: "do " },
+        { type: "icon", icon: "weaken", value: 6 },
         { type: "text", text: " damage" },
       ],
     },
@@ -849,6 +1065,9 @@ const EQUIPMENT = {
         { type: "text", text: " weaken" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
+    },
   },
   electricShock: {
     name: "Electric Shock",
@@ -869,6 +1088,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   electromagnet: {
     name: "Electromagnet",
@@ -885,6 +1107,15 @@ const EQUIPMENT = {
     ],
     upgrade: {
       size: 1,
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 4 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "Damage doesn't increase" },
+      ],
     },
   },
   fireBreath: {
@@ -913,6 +1144,13 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 4 },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   firePotion: {
     name: "Fire Potion",
@@ -928,6 +1166,14 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 6 },
+    },
+    weaken: {
+      effect: [
+        { type: "icon", icon: "fire", value: 4 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
     },
   },
   fists: {
@@ -950,6 +1196,15 @@ const EQUIPMENT = {
         { type: "text", text: " damage" },
         { type: "lineBreak" },
         { type: "text", text: "(2 uses this turn)", muted: true },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 3 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "(1 use this turn)", muted: true },
       ],
     },
   },
@@ -977,6 +1232,13 @@ const EQUIPMENT = {
         { type: "text", text: "Burn all dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Deal " },
+        { type: "icon", icon: "sword", value: 5 },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   flight: {
     name: "Flight",
@@ -989,6 +1251,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
     },
   },
   foolsFire: {
@@ -1003,6 +1268,13 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 6 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Burns " },
+        { type: "icon", icon: "fire", value: 1 },
+        { type: "text", text: " dice" },
+      ],
     },
   },
   freezeSpell: {
@@ -1029,6 +1301,17 @@ const EQUIPMENT = {
         { type: "text", text: "Freeze all dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Deal " },
+        { type: "icon", icon: "ice", value: 5 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "Freeze " },
+        { type: "icon", icon: "ice", value: 1 },
+        { type: "text", text: " dice" },
+      ],
+    },
   },
   glare: {
     name: "Glare",
@@ -1050,6 +1333,15 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
         { type: "lineBreak" },
         { type: "text", text: "(Reuseable)", muted: true },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Lock " },
+        { type: "icon", icon: "lock", value: 1 },
+        { type: "text", text: " dice" },
+        { type: "lineBreak" },
+        { type: "text", text: "(1 use this turn)", muted: true },
       ],
     },
   },
@@ -1075,6 +1367,15 @@ const EQUIPMENT = {
         { type: "text", text: "(3 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Lock " },
+        { type: "icon", icon: "lock", value: 1 },
+        { type: "text", text: " dice" },
+        { type: "lineBreak" },
+        { type: "text", text: "(1 use this turn)", muted: true },
+      ],
+    },
   },
   hallOfMirrors: {
     name: "Hall of Mirrors",
@@ -1087,6 +1388,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "even" },
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 6 }, { type: "exact", value: 6 }],
     },
   },
   hammer: {
@@ -1107,6 +1411,14 @@ const EQUIPMENT = {
     ],
     upgrade: {
       size: 1,
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "shock" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
     },
   },
   headbutt: {
@@ -1132,6 +1444,16 @@ const EQUIPMENT = {
         { type: "text", text: " + 1 damage" },
         { type: "lineBreak" },
         { type: "text", text: "(2 uses this turn)", muted: true },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "(1 use this turn)", muted: true },
       ],
     },
   },
@@ -1161,6 +1483,15 @@ const EQUIPMENT = {
         { type: "text", text: "(once per battle)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "fire", value: 1 },
+        { type: "text", text: " burn" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
+    },
   },
   highNote: {
     name: "High Note",
@@ -1181,6 +1512,13 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "icon", icon: "weaken", value: "Weakens" },
         { type: "text", text: " enemy" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "weaken", value: 9 },
+        { type: "text", text: " damage" },
       ],
     },
   },
@@ -1210,6 +1548,15 @@ const EQUIPMENT = {
         { type: "text", text: "(once per battle)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Lock " },
+        { type: "icon", icon: "lock", value: 1 },
+        { type: "text", text: " dice" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
+    },
   },
   iceAge: {
     name: "Ice Age",
@@ -1222,6 +1569,14 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "doubles" },
+    },
+    weaken: {
+      requirement: [
+        { type: "exact", value: 1 },
+        { type: "exact", value: 1 },
+        { type: "exact", value: 1 },
+        { type: "exact", value: 1 },
+      ],
     },
   },
   iceShard: {
@@ -1243,6 +1598,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   infliction: {
     name: "Infliction",
@@ -1261,6 +1619,9 @@ const EQUIPMENT = {
         { type: "icon", icon: "sword", value: 4 },
         { type: "text", text: " damage" },
       ],
+    },
+    weaken: {
+      requirement: { type: "max", value: 3 },
     },
   },
   inkSplat: {
@@ -1283,6 +1644,9 @@ const EQUIPMENT = {
         { type: "text", text: "(Reuseable)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
+    },
   },
   keyblade: {
     name: "Keyblade",
@@ -1304,6 +1668,13 @@ const EQUIPMENT = {
         { type: "text", text: " damage," },
         { type: "lineBreak" },
         { type: "text", text: "return the dice" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 1 },
+        { type: "text", text: " damage" },
       ],
     },
   },
@@ -1336,6 +1707,14 @@ const EQUIPMENT = {
         { type: "text", text: " freeze" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "ice" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   lock1: {
     name: "Lock 1",
@@ -1354,6 +1733,9 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "return the dice" },
       ],
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 1 }, { type: "exact", value: 1 }],
     },
   },
   lock2: {
@@ -1374,6 +1756,9 @@ const EQUIPMENT = {
         { type: "text", text: "return the dice" },
       ],
     },
+    weaken: {
+      requirement: [{ type: "exact", value: 2 }, { type: "exact", value: 2 }],
+    },
   },
   lock3: {
     name: "Lock 3",
@@ -1392,6 +1777,9 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "return the dice" },
       ],
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 3 }, { type: "exact", value: 3 }],
     },
   },
   lock4: {
@@ -1412,6 +1800,9 @@ const EQUIPMENT = {
         { type: "text", text: "return the dice" },
       ],
     },
+    weaken: {
+      requirement: [{ type: "exact", value: 4 }, { type: "exact", value: 4 }],
+    },
   },
   lock5: {
     name: "Lock 5",
@@ -1430,6 +1821,9 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "return the dice" },
       ],
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 5 }, { type: "exact", value: 5 }],
     },
   },
   lock6: {
@@ -1450,6 +1844,9 @@ const EQUIPMENT = {
         { type: "text", text: "return the dice" },
       ],
     },
+    weaken: {
+      requirement: [{ type: "exact", value: 6 }, { type: "exact", value: 6 }],
+    },
   },
   midnightCharm: {
     name: "Midnight Charm",
@@ -1462,6 +1859,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 5 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Roll 1 six" },
+      ],
     },
   },
   moodChange: {
@@ -1486,6 +1888,11 @@ const EQUIPMENT = {
         { type: "text", text: " health" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Change the weather" },
+      ],
+    },
   },
   mysteryBox: {
     name: "Mystery Box",
@@ -1501,6 +1908,7 @@ const EQUIPMENT = {
         { type: "text", text: "Contents upgraded" },
       ],
     },
+    weaken: {},
   },
   nightmare: {
     name: "Nightmare",
@@ -1515,6 +1923,13 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 74 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 998 },
+        { type: "text", text: " damage" },
+      ],
     },
   },
   overwhelm: {
@@ -1541,6 +1956,9 @@ const EQUIPMENT = {
         { type: "text", text: "(3 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   peaShooter: {
     name: "Pea Shooter",
@@ -1559,6 +1977,15 @@ const EQUIPMENT = {
       effect: [
         { type: "text", text: "Do " },
         { type: "icon", icon: "sword", value: 4 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "(Reuseable)", muted: true },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 1 },
         { type: "text", text: " damage" },
         { type: "lineBreak" },
         { type: "text", text: "(Reuseable)", muted: true },
@@ -1587,6 +2014,9 @@ const EQUIPMENT = {
         { type: "text", text: "(once per battle)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   pirateHook: {
     name: "Pirate Hook",
@@ -1611,6 +2041,14 @@ const EQUIPMENT = {
         { type: "text", text: " damage," },
         { type: "lineBreak" },
         { type: "text", text: "on 5, you can re-use this" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
       ],
     },
   },
@@ -1639,6 +2077,16 @@ const EQUIPMENT = {
         { type: "text", text: "(Reuseable)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "(3 uses this turn)", muted: true },
+      ],
+    },
   },
   poisonCloud: {
     name: "Poison Cloud",
@@ -1660,6 +2108,9 @@ const EQUIPMENT = {
         { type: "text", text: " poison" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 2 },
+    },
   },
   poisonSlingshot: {
     name: "Poison Slingshot",
@@ -1674,6 +2125,13 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 9 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Add " },
+        { type: "icon", icon: "poison", value: 2 },
+        { type: "text", text: " poison" },
+      ],
     },
   },
   poisonSpell: {
@@ -1693,6 +2151,9 @@ const EQUIPMENT = {
         { type: "icon", icon: "poison", value: 5 },
         { type: "text", text: " poison" },
       ],
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 3 }, { type: "exact", value: 3 }],
     },
   },
   rat: {
@@ -1715,6 +2176,13 @@ const EQUIPMENT = {
         { type: "text", text: " poison," },
         { type: "lineBreak" },
         { type: "text", text: "roll a dice 3 or more" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "poison", value: 1 },
+        { type: "text", text: " poison" },
       ],
     },
   },
@@ -1743,6 +2211,9 @@ const EQUIPMENT = {
         { type: "text", text: "(once per battle)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   rottenCore: {
     name: "Rotten Core",
@@ -1756,6 +2227,13 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "countdown", value: 12 },
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Reduce health by" },
+        { type: "lineBreak" },
+        { type: "text", text: "one third" },
+      ],
+    },
   },
   runAway: {
     name: "Run Away!",
@@ -1768,6 +2246,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 15 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "No effect" },
+      ],
     },
   },
   sadVerse: {
@@ -1788,6 +2271,14 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "max", value: 5 },
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "weaken" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   shootingStar: {
     name: "Shooting Star",
@@ -1807,6 +2298,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
+    },
   },
   shriek: {
     name: "Shriek",
@@ -1819,6 +2313,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "max", value: 2 },
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 2 }, { type: "exact", value: 2 }],
     },
   },
   sinkhole: {
@@ -1836,6 +2333,13 @@ const EQUIPMENT = {
       effect: [
         { type: "text", text: "Inflict " },
         { type: "icon", icon: "weaken", value: 4 },
+        { type: "text", text: " weaken" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "weaken", value: 2 },
         { type: "text", text: " weaken" },
       ],
     },
@@ -1862,6 +2366,16 @@ const EQUIPMENT = {
         { type: "text", text: " damage" },
         { type: "lineBreak" },
         { type: "text", text: "(6 uses this turn)", muted: true },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "(2 uses this turn)", muted: true },
       ],
     },
   },
@@ -1891,6 +2405,13 @@ const EQUIPMENT = {
         { type: "text", text: " blind" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "poison", value: 3 },
+        { type: "text", text: " poison" },
+      ],
+    },
   },
   sneeze: {
     name: "Sneeze",
@@ -1909,6 +2430,14 @@ const EQUIPMENT = {
         { type: "text", text: "Reduce the countdowns" },
         { type: "lineBreak" },
         { type: "text", text: "on all equipment to zero" },
+      ],
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 6 }, { type: "exact", value: 6 }],
+      effect: [
+        { type: "text", text: "Reduce the countdowns" },
+        { type: "lineBreak" },
+        { type: "text", text: "on all equipment by 6" },
       ],
     },
   },
@@ -1943,6 +2472,14 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   snowstorm: {
     name: "Snowstorm",
@@ -1970,6 +2507,15 @@ const EQUIPMENT = {
         { type: "text", text: "(once per battle)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "ice", value: 1 },
+        { type: "text", text: " freeze" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
+    },
   },
   sonicWave: {
     name: "Sonic Wave",
@@ -1989,6 +2535,12 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "max", value: 5 },
     },
+    weaken: {
+      effect: [
+        { type: "icon", icon: "weaken", value: "Weakens" },
+        { type: "text", text: " enemy" },
+      ],
+    },
   },
   spanner: {
     name: "Spanner",
@@ -2006,6 +2558,9 @@ const EQUIPMENT = {
         { type: "text", text: "(3 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      requirement: [{ type: "max", value: 3 }, { type: "max", value: 3 }],
+    },
   },
   spike: {
     name: "Spike",
@@ -2020,6 +2575,13 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 4 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 1 },
+        { type: "text", text: " damage" },
+      ],
     },
   },
   spikyPotion: {
@@ -2037,6 +2599,15 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 6 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 4 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
     },
   },
   squawk: {
@@ -2057,6 +2628,9 @@ const EQUIPMENT = {
         { type: "text", text: "Silence Enemy" },
       ],
     },
+    weaken: {
+      requirement: [{ type: "exact", value: 6 }, { type: "exact", value: 6 }],
+    },
   },
   teleportSpell: {
     name: "Teleport Spell",
@@ -2069,6 +2643,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "odd" },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "No effect" },
+      ],
     },
   },
   theAshes: {
@@ -2095,6 +2674,13 @@ const EQUIPMENT = {
         { type: "dieSlot" },
         { type: "text", text: " + 6 damage," },
         { type: "lineBreak" },
+        { type: "text", text: "Burn " },
+        { type: "icon", icon: "fire", value: 5 },
+        { type: "text", text: " dice" },
+      ],
+    },
+    weaken: {
+      effect: [
         { type: "text", text: "Burn " },
         { type: "icon", icon: "fire", value: 5 },
         { type: "text", text: " dice" },
@@ -2130,6 +2716,13 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Freeze " },
+        { type: "icon", icon: "ice", value: 4 },
+        { type: "text", text: " dice" },
+      ],
+    },
   },
   theCurse: {
     name: "The Curse",
@@ -2153,6 +2746,11 @@ const EQUIPMENT = {
         { type: "dieSlot" },
         { type: "text", text: " + 4 damage," },
         { type: "lineBreak" },
+        { type: "text", text: "Inflict curse" },
+      ],
+    },
+    weaken: {
+      effect: [
         { type: "text", text: "Inflict curse" },
       ],
     },
@@ -2181,6 +2779,13 @@ const EQUIPMENT = {
         { type: "dieSlot" },
         { type: "text", text: " + 5 damage," },
         { type: "lineBreak" },
+        { type: "text", text: "Blind " },
+        { type: "icon", icon: "blind", value: 3 },
+        { type: "text", text: " dice" },
+      ],
+    },
+    weaken: {
+      effect: [
         { type: "text", text: "Blind " },
         { type: "icon", icon: "blind", value: 3 },
         { type: "text", text: " dice" },
@@ -2215,6 +2820,13 @@ const EQUIPMENT = {
         { type: "text", text: " and silence" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "shock", value: 6 },
+        { type: "text", text: " shock" },
+      ],
+    },
   },
   theWind: {
     name: "The Wind",
@@ -2240,6 +2852,13 @@ const EQUIPMENT = {
         { type: "dieSlot" },
         { type: "text", text: " + 4 damage," },
         { type: "lineBreak" },
+        { type: "text", text: "Lock " },
+        { type: "icon", icon: "lock", value: 2 },
+        { type: "text", text: " dice" },
+      ],
+    },
+    weaken: {
+      effect: [
         { type: "text", text: "Lock " },
         { type: "icon", icon: "lock", value: 2 },
         { type: "text", text: " dice" },
@@ -2272,6 +2891,17 @@ const EQUIPMENT = {
         { type: "text", text: " equipment" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Deal " },
+        { type: "icon", icon: "shock", value: 5 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "Shock " },
+        { type: "icon", icon: "shock", value: 1 },
+        { type: "text", text: " equipment" },
+      ],
+    },
   },
   thunderStorm: {
     name: "Thunder Storm",
@@ -2299,6 +2929,15 @@ const EQUIPMENT = {
         { type: "text", text: "(once per battle)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "shock", value: 1 },
+        { type: "text", text: " shock" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
+    },
   },
   towerShield: {
     name: "Tower Shield",
@@ -2317,6 +2956,16 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Add " },
+        { type: "icon", icon: "shield" },
+        { type: "dieSlot" },
+        { type: "text", text: " shield" },
+        { type: "lineBreak" },
+        { type: "text", text: "(1 use this turn)", muted: true },
+      ],
+    },
   },
   toxicPotion: {
     name: "Toxic Potion",
@@ -2333,6 +2982,15 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 6 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "poison", value: 3 },
+        { type: "text", text: " poison" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
     },
   },
   twoHandedSword: {
@@ -2358,6 +3016,9 @@ const EQUIPMENT = {
         { type: "icon", icon: "lock", value: 1 },
         { type: "text", text: " dice" },
       ],
+    },
+    weaken: {
+      requirement: [{ type: "max", value: 5 }, { type: "max", value: 5 }],
     },
   },
   venusFlyTrap: {
@@ -2388,6 +3049,19 @@ const EQUIPMENT = {
         { type: "text", text: " health" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage," },
+        { type: "lineBreak" },
+        { type: "text", text: "on 3, restore " },
+        { type: "icon", icon: "heal", value: 1 },
+        { type: "text", text: " health" },
+      ],
+    },
   },
   wail: {
     name: "Wail",
@@ -2400,6 +3074,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "min", value: 5 },
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 5 }, { type: "exact", value: 5 }],
     },
   },
   wickerStaff: {
@@ -2420,6 +3097,17 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "countdown", value: 9 },
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Deal " },
+        { type: "icon", icon: "fire", value: 5 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "Burn " },
+        { type: "icon", icon: "fire", value: 1 },
+        { type: "text", text: " dice" },
+      ],
+    },
   },
   wormBite: {
     name: "Worm Bite",
@@ -2439,6 +3127,9 @@ const EQUIPMENT = {
         { type: "text", text: " damage" },
       ],
     },
+    weaken: {
+      requirement: { type: "min", value: 4 },
+    },
   },
   yoink: {
     name: "Yoink",
@@ -2453,6 +3144,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
     },
   },
   airCrystal: {
@@ -2474,6 +3168,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   earthCrystal: {
     name: "Earth Crystal",
@@ -2492,6 +3189,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
     },
   },
   fireCrystal: {
@@ -2512,6 +3212,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
     },
   },
   hollowCrystal: {
@@ -2535,6 +3238,9 @@ const EQUIPMENT = {
         { type: "text", text: " + 2 damage" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   iceCrystal: {
     name: "Ice Crystal",
@@ -2555,6 +3261,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
+    },
   },
   lifeCrystal: {
     name: "Life Crystal",
@@ -2571,6 +3280,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "max", value: 5 },
     },
+    weaken: {
+      requirement: { type: "max", value: 2 },
+    },
   },
   powerCrystal: {
     name: "Power Crystal",
@@ -2584,6 +3296,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   smokeyCrystal: {
     name: "Smokey Crystal",
@@ -2596,6 +3311,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
     },
   },
 
@@ -2634,6 +3352,9 @@ const EQUIPMENT = {
         { type: "text", text: " to yourself" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   buckler: {
     name: "Buckler",
@@ -2648,6 +3369,13 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 5 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Add " },
+        { type: "icon", icon: "shield", value: 2 },
+        { type: "text", text: " to shield" },
+      ],
     },
   },
   bump: {
@@ -2665,6 +3393,9 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "(2 uses this turn)", muted: true },
       ],
+    },
+    weaken: {
+      requirement: { type: "max", value: 3 },
     },
   },
   counterSpell: {
@@ -2692,6 +3423,9 @@ const EQUIPMENT = {
         { type: "text", text: "(2 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   crystalSword: {
     name: "Crystal Sword",
@@ -2712,6 +3446,17 @@ const EQUIPMENT = {
     // battle); the first is the one the Warrior and Inventor get.
     upgrade: {
       size: 1,
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "text", text: "2x" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
     },
   },
   dagger: {
@@ -2739,6 +3484,9 @@ const EQUIPMENT = {
         { type: "text", text: "(Reuseable)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 2 },
+    },
   },
   firstAidKit: {
     name: "First Aid Kit",
@@ -2753,6 +3501,13 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 12 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Heal " },
+        { type: "icon", icon: "heal", value: 4 },
+        { type: "text", text: " health" },
+      ],
     },
   },
   healingCrystal: {
@@ -2780,6 +3535,9 @@ const EQUIPMENT = {
         { type: "text", text: " poison" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 2 },
+    },
   },
   ironShield: {
     name: "Iron Shield",
@@ -2802,6 +3560,9 @@ const EQUIPMENT = {
         { type: "text", text: " + 1 shield" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   jugglingBall: {
     name: "Juggling Ball",
@@ -2819,6 +3580,14 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "max", value: 4 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
     },
   },
   lightningRod: {
@@ -2838,6 +3607,15 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "even" },
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Discharge, but do" },
+        { type: "lineBreak" },
+        { type: "text", text: "zero " },
+        { type: "icon", icon: "sword" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
   matchstick: {
     name: "Matchstick",
@@ -2855,6 +3633,13 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Burns " },
+        { type: "icon", icon: "fire", value: 1 },
+        { type: "text", text: " dice" },
+      ],
+    },
   },
   nightstick: {
     name: "Nightstick",
@@ -2870,6 +3655,12 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      effect: [
+        { type: "icon", icon: "shock", value: "Shocks" },
+        { type: "text", text: " the enemy" },
+      ],
     },
   },
   shieldBash: {
@@ -2889,6 +3680,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "even" },
     },
+    weaken: {
+      requirement: [{ type: "exact", value: 6 }, { type: "exact", value: 6 }],
+    },
   },
   snakeEyeCharm: {
     name: "Snake Eye Charm",
@@ -2901,6 +3695,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 3 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Roll 1 one" },
+      ],
     },
   },
   spatula: {
@@ -2918,6 +3717,9 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "(3 uses this turn)", muted: true },
       ],
+    },
+    weaken: {
+      requirement: { type: "min", value: 4 },
     },
   },
   spikedShield: {
@@ -2940,6 +3742,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   staff: {
     name: "Staff",
@@ -2960,6 +3765,17 @@ const EQUIPMENT = {
       effect: [
         { type: "text", text: "Deal " },
         { type: "icon", icon: "fire", value: 8 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "Burn " },
+        { type: "icon", icon: "fire", value: 1 },
+        { type: "text", text: " dice" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Deal " },
+        { type: "icon", icon: "fire", value: 3 },
         { type: "text", text: " damage" },
         { type: "lineBreak" },
         { type: "text", text: "Burn " },
@@ -2989,6 +3805,9 @@ const EQUIPMENT = {
         { type: "text", text: " + 1 damage" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 5 },
+    },
   },
   targetShield: {
     name: "Target Shield",
@@ -3006,6 +3825,14 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "max", value: 3 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Add " },
+        { type: "icon", icon: "shield" },
+        { type: "dieSlot" },
+        { type: "text", text: " to shield" },
+      ],
     },
   },
   tazer: {
@@ -3025,6 +3852,12 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "max", value: 5 },
+    },
+    weaken: {
+      effect: [
+        { type: "icon", icon: "shock", value: "Shocks" },
+        { type: "text", text: " the enemy" },
+      ],
     },
   },
   toxicOoze: {
@@ -3052,6 +3885,18 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "on 6, add " },
         { type: "icon", icon: "poison", value: 3 },
+        { type: "text", text: " poison" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage," },
+        { type: "lineBreak" },
+        { type: "text", text: "on 6, add " },
+        { type: "icon", icon: "poison", value: 1 },
         { type: "text", text: " poison" },
       ],
     },
@@ -3084,6 +3929,14 @@ const EQUIPMENT = {
         { type: "text", text: " burn" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "fire" },
+        { type: "dieSlot" },
+        { type: "text", text: " damage" },
+      ],
+    },
   },
 
   // ---------- Thief, episode 1 ----------
@@ -3105,6 +3958,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: { type: "odd" },
     },
+    weaken: {
+      requirement: [{ type: "exact", value: 3 }, { type: "exact", value: 3 }],
+    },
   },
   bandage: {
     name: "Bandage",
@@ -3122,6 +3978,13 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Heal " },
+        { type: "icon", icon: "heal", value: 1 },
+        { type: "text", text: " health" },
+      ],
+    },
   },
   blender: {
     name: "Blender",
@@ -3138,6 +4001,9 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "and roll an extra 1" },
       ],
+    },
+    weaken: {
+      requirement: { type: "even" },
     },
   },
   catastrophe: {
@@ -3168,6 +4034,18 @@ const EQUIPMENT = {
         { type: "text", text: " freeze" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "shock" },
+        { type: "text", text: " shock," },
+        { type: "lineBreak" },
+        { type: "icon", icon: "fire" },
+        { type: "text", text: " burn, or " },
+        { type: "icon", icon: "ice" },
+        { type: "text", text: " freeze" },
+      ],
+    },
   },
   counterfeit: {
     name: "Counterfeit",
@@ -3180,6 +4058,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       size: 1,
+    },
+    weaken: {
+      requirement: { type: "max", value: 3 },
     },
   },
   crowbar: {
@@ -3204,6 +4085,9 @@ const EQUIPMENT = {
         { type: "text", text: "(2 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   detonator: {
     name: "Detonator",
@@ -3223,6 +4107,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   dodge: {
     name: "Dodge",
@@ -3235,6 +4122,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 12 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "No effect" },
+      ],
     },
   },
   glassCauldron: {
@@ -3261,6 +4153,13 @@ const EQUIPMENT = {
         { type: "text", text: "(2 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Freeze " },
+        { type: "icon", icon: "ice", value: 1 },
+        { type: "text", text: " dice" },
+      ],
+    },
   },
   hacksaw: {
     name: "Hacksaw",
@@ -3273,6 +4172,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
     },
   },
   hookshot: {
@@ -3288,6 +4190,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "even" },
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 2 }, { type: "exact", value: 2 }],
     },
   },
   ironArmor: {
@@ -3305,6 +4210,15 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "odd" },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Reduce " },
+        { type: "icon", icon: "armor", value: 1 },
+        { type: "text", text: " damage" },
+        { type: "lineBreak" },
+        { type: "text", text: "from each attack" },
+      ],
     },
   },
   lantern: {
@@ -3327,6 +4241,9 @@ const EQUIPMENT = {
         { type: "text", text: "s next turn" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   lastStand: {
     name: "Last Stand",
@@ -3341,6 +4258,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 9 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "No effect" },
+      ],
     },
   },
   leatherArmor: {
@@ -3359,6 +4281,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
+    },
   },
   lockpick: {
     name: "Lockpick",
@@ -3374,6 +4299,11 @@ const EQUIPMENT = {
         { type: "text", text: "Split a dice in two" },
         { type: "lineBreak" },
         { type: "text", text: "On six, split in three" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Split value in two" },
       ],
     },
   },
@@ -3393,6 +4323,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       size: 1,
+    },
+    weaken: {
+      requirement: { type: "min", value: 4 },
     },
   },
   poisonNeedle: {
@@ -3417,6 +4350,15 @@ const EQUIPMENT = {
         { type: "text", text: "(5 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "poison", value: 1 },
+        { type: "text", text: " poison" },
+        { type: "lineBreak" },
+        { type: "text", text: "(1 use this turn)", muted: true },
+      ],
+    },
   },
   skeletonKey: {
     name: "Skeleton Key",
@@ -3430,6 +4372,12 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: [{ type: "exact", value: 2 }, { type: "exact", value: 2 }],
+      effect: [
+        { type: "text", text: "Set all dice to 2" },
+      ],
     },
   },
 
@@ -3462,6 +4410,9 @@ const EQUIPMENT = {
         { type: "text", text: "(2 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   busterSword: {
     name: "Buster Sword",
@@ -3488,6 +4439,9 @@ const EQUIPMENT = {
         { type: "text", text: "immune to errors" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   cheatCode: {
     name: "Cheat Code",
@@ -3507,6 +4461,9 @@ const EQUIPMENT = {
         { type: "text", text: "by 2 this turn" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
+    },
   },
   doppeldice: {
     name: "Doppeldice",
@@ -3519,6 +4476,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "max", value: 2 },
     },
   },
   fixedPayout: {
@@ -3539,6 +4499,9 @@ const EQUIPMENT = {
         { type: "text", text: "Jackpot abilities" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   forcefield: {
     name: "Forcefield",
@@ -3557,6 +4520,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
     },
   },
   heatSink: {
@@ -3578,6 +4544,9 @@ const EQUIPMENT = {
         { type: "text", text: "counter by 7" },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   increment: {
     name: "Increment",
@@ -3596,6 +4565,9 @@ const EQUIPMENT = {
         { type: "lineBreak" },
         { type: "text", text: "(Reuseable)", muted: true },
       ],
+    },
+    weaken: {
+      requirement: { type: "max", value: 3 },
     },
   },
   mechanicalArm: {
@@ -3616,6 +4588,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   nudge: {
     name: "Nudge",
@@ -3633,6 +4608,9 @@ const EQUIPMENT = {
         { type: "text", text: "(3 uses this turn)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   plasmaBlaster: {
     name: "Plasma Blaster",
@@ -3648,6 +4626,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "max", value: 3 },
     },
   },
   ultimaWeapon: {
@@ -3675,6 +4656,9 @@ const EQUIPMENT = {
         { type: "text", text: "double on jackpot" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
 
   // ---------- Inventor, episode 1 ----------
@@ -3693,6 +4677,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   crossbow: {
     name: "Crossbow",
@@ -3707,6 +4694,13 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "countdown", value: 9 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 4 },
+        { type: "text", text: " damage" },
+      ],
     },
   },
   flamethrower: {
@@ -3738,6 +4732,9 @@ const EQUIPMENT = {
         { type: "text", text: "(once per battle)", muted: true },
       ],
     },
+    weaken: {
+      requirement: [{ type: "max", value: 3 }, { type: "max", value: 3 }],
+    },
   },
   scrapMetal: {
     name: "Scrap Metal",
@@ -3761,6 +4758,13 @@ const EQUIPMENT = {
         { type: "text", text: "(Always offered as scrap)", muted: true },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "No effect" },
+        { type: "lineBreak" },
+        { type: "text", text: "(Always offered as scrap)", muted: true },
+      ],
+    },
   },
   snowflake: {
     name: "Snowflake",
@@ -3775,6 +4779,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
     },
   },
   spark: {
@@ -3791,6 +4798,9 @@ const EQUIPMENT = {
     upgrade: {
       requirement: null,
     },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
+    },
   },
   whisper: {
     name: "Whisper",
@@ -3805,6 +4815,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 5 },
     },
   },
 
@@ -3833,6 +4846,15 @@ const EQUIPMENT = {
         { type: "text", text: " damage," },
         { type: "lineBreak" },
         { type: "text", text: "freeze all dice" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "ice", value: 12 },
+        { type: "text", text: " damage," },
+        { type: "lineBreak" },
+        { type: "text", text: "freeze a dice" },
       ],
     },
   },
@@ -3864,6 +4886,9 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
       ],
     },
+    weaken: {
+      requirement: [{ type: "max", value: 3 }, { type: "max", value: 3 }],
+    },
   },
   crucible: {
     name: "Crucible",
@@ -3883,6 +4908,11 @@ const EQUIPMENT = {
         { type: "text", text: "burning dice" },
       ],
     },
+    weaken: {
+      effect: [
+        { type: "text", text: "Roll a burning dice" },
+      ],
+    },
   },
   duplicate: {
     name: "Duplicate",
@@ -3895,6 +4925,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: null,
+    },
+    weaken: {
+      requirement: { type: "exact", value: 6 },
     },
   },
   furySpell: {
@@ -3909,6 +4942,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "even" },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "No effect" },
+      ],
     },
   },
   goldCauldron: {
@@ -3933,6 +4971,13 @@ const EQUIPMENT = {
         { type: "text", text: " dmg, even dice" },
         { type: "lineBreak" },
         { type: "text", text: "(2 uses this turn)", muted: true },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 1 },
+        { type: "text", text: " damage" },
       ],
     },
   },
@@ -3962,6 +5007,9 @@ const EQUIPMENT = {
         { type: "text", text: " shock" },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   illuminate: {
     name: "Illuminate",
@@ -3984,6 +5032,9 @@ const EQUIPMENT = {
         { type: "dieSlot" },
         { type: "text", text: "s next turn" },
       ],
+    },
+    weaken: {
+      requirement: { type: "max", value: 3 },
     },
   },
   inferno: {
@@ -4014,6 +5065,9 @@ const EQUIPMENT = {
         { type: "text", text: " dice" },
       ],
     },
+    weaken: {
+      requirement: [{ type: "max", value: 3 }, { type: "max", value: 3 }],
+    },
   },
   lifeDrain: {
     name: "Life Drain",
@@ -4029,6 +5083,9 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "max", value: 4 },
+    },
+    weaken: {
+      requirement: { type: "max", value: 2 },
     },
   },
   lightningBolt: {
@@ -4059,6 +5116,9 @@ const EQUIPMENT = {
         { type: "text", text: " shock" },
       ],
     },
+    weaken: {
+      requirement: [{ type: "max", value: 3 }, { type: "max", value: 3 }],
+    },
   },
   magicDagger: {
     name: "Magic Dagger",
@@ -4082,6 +5142,9 @@ const EQUIPMENT = {
         { type: "text", text: "(Reuseable)", muted: true },
       ],
     },
+    weaken: {
+      requirement: { type: "max", value: 3 },
+    },
   },
   magicKey: {
     name: "Magic Key",
@@ -4094,6 +5157,11 @@ const EQUIPMENT = {
     ],
     upgrade: {
       requirement: { type: "min", value: 2 },
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Split value in two" },
+      ],
     },
   },
   magicSpear: {
@@ -4111,6 +5179,13 @@ const EQUIPMENT = {
       effect: [
         { type: "text", text: "Do " },
         { type: "icon", icon: "sword", value: 14 },
+        { type: "text", text: " damage" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 5 },
         { type: "text", text: " damage" },
       ],
     },
@@ -4136,6 +5211,15 @@ const EQUIPMENT = {
         { type: "text", text: " damage," },
         { type: "lineBreak" },
         { type: "text", text: "burn all dice" },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "fire", value: 10 },
+        { type: "text", text: " damage," },
+        { type: "lineBreak" },
+        { type: "text", text: "burn a dice" },
       ],
     },
   },
@@ -4167,6 +5251,9 @@ const EQUIPMENT = {
         { type: "text", text: " weaken" },
       ],
     },
+    weaken: {
+      requirement: [{ type: "max", value: 3 }, { type: "max", value: 3 }],
+    },
   },
   silverCauldron: {
     name: "Silver Cauldron",
@@ -4188,6 +5275,13 @@ const EQUIPMENT = {
         { type: "text", text: " dmg, odd dice" },
         { type: "lineBreak" },
         { type: "text", text: "(2 uses this turn)", muted: true },
+      ],
+    },
+    weaken: {
+      effect: [
+        { type: "text", text: "Do " },
+        { type: "icon", icon: "sword", value: 1 },
+        { type: "text", text: " damage" },
       ],
     },
   },

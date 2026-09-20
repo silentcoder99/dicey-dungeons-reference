@@ -11,7 +11,8 @@ const {
   EQUIPMENT_IDS,
   pageEquipment,
   resolveUpgrade,
-  UPGRADE_KEYS,
+  resolveWeaken,
+  OVERRIDE_KEYS,
 } = require("./helpers");
 const { ICON_SYMBOLS } = require("../js/icons.js");
 
@@ -35,11 +36,12 @@ test("every equipment id an enemy page shows exists", () => {
   }
 });
 
-// Both forms of every card, since an upgrade can change the requirement or the effect (and so can
-// introduce a socket style or an icon nothing else uses).
+// All three forms of every card, since an upgrade or a weakening can change the requirement or the
+// effect (and so can introduce a socket style or an icon nothing else uses).
 test("every requirement type and icon used by equipment is one the renderer draws", () => {
   for (const id of EQUIPMENT_IDS) {
-    for (const [form, equipment] of [["", EQUIPMENT[id]], ["+", resolveUpgrade(id)]]) {
+    const forms = [["", EQUIPMENT[id]], ["+", resolveUpgrade(id)], ["-", resolveWeaken(id)]];
+    for (const [form, equipment] of forms) {
       for (const requirement of [].concat(equipment.requirement)) {
         if (requirement) expect(REQUIREMENT_TYPES, `${id}${form} requirement`).toContain(requirement.type);
       }
@@ -56,30 +58,43 @@ test("every requirement type and icon used by equipment is one the renderer draw
   }
 });
 
-// The `upgrade` override is merged straight onto the entry, so a stray key would silently do
-// nothing and a missing one would mean nobody has authored that card's upgrade yet.
-test("every equipment has an upgrade override listing only fields the card shows", () => {
+// An override is merged straight onto the entry, so a stray key would silently do nothing and a
+// missing override would mean nobody has authored that form of the card yet.
+test("every equipment has upgrade and weaken overrides listing only fields the card shows", () => {
   for (const id of EQUIPMENT_IDS) {
-    const upgrade = EQUIPMENT[id].upgrade;
-    expect(upgrade, `${id} upgrade`).toBeDefined();
-    expect(Array.isArray(upgrade), `${id} upgrade is an object`).toBe(false);
-    expect(typeof upgrade, `${id} upgrade is an object`).toBe("object");
-    for (const key of Object.keys(upgrade)) {
-      expect(UPGRADE_KEYS, `${id} upgrade key ${key}`).toContain(key);
+    for (const kind of ["upgrade", "weaken"]) {
+      const override = EQUIPMENT[id][kind];
+      expect(override, `${id} ${kind}`).toBeDefined();
+      expect(Array.isArray(override), `${id} ${kind} is an object`).toBe(false);
+      expect(typeof override, `${id} ${kind} is an object`).toBe("object");
+      for (const key of Object.keys(override)) {
+        expect(OVERRIDE_KEYS, `${id} ${kind} key ${key}`).toContain(key);
+      }
     }
   }
 });
 
-// A card whose upgrade repeats what the base already says is a transcription slip, not a card that
-// doesn't change -- that case is written as `upgrade: {}` instead.
-test("no upgrade override restates a value the base entry already has", () => {
+// An override that repeats what the base already says is a transcription slip, not a card that
+// doesn't change -- that case is written as `upgrade: {}` / `weaken: {}` instead.
+test("no override restates a value the base entry already has", () => {
   for (const id of EQUIPMENT_IDS) {
     const base = EQUIPMENT[id];
-    for (const [key, value] of Object.entries(base.upgrade)) {
-      expect(JSON.stringify(value), `${id} upgrade ${key} repeats the base`).not.toBe(
-        JSON.stringify(base[key])
-      );
+    for (const kind of ["upgrade", "weaken"]) {
+      for (const [key, value] of Object.entries(base[kind])) {
+        expect(JSON.stringify(value), `${id} ${kind} ${key} repeats the base`).not.toBe(
+          JSON.stringify(base[key])
+        );
+      }
     }
+  }
+});
+
+// Nothing on the wiki gives a weakened card a different footprint, and the renderer's placeholder
+// treatment assumes the shape holds. If a "Weakened Size" row ever turns up, this is the guard that
+// has to be relaxed deliberately rather than a card quietly changing shape.
+test("no weaken override changes the card's size", () => {
+  for (const id of EQUIPMENT_IDS) {
+    expect(EQUIPMENT[id].weaken.size, `${id} weaken size`).toBeUndefined();
   }
 });
 

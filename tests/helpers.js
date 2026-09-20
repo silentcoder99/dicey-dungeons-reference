@@ -40,7 +40,42 @@ function resolveUpgrade(equipmentId) {
   return { ...base, ...base.upgrade, name: `${base.name}+` };
 }
 
-const UPGRADE_KEYS = ["size", "requirement", "bonusDieFace", "effect"];
+// The weakened form, the same way: the `weaken` override and a "-".
+function resolveWeaken(equipmentId) {
+  const base = EQUIPMENT[equipmentId];
+  return { ...base, ...base.weaken, name: `${base.name}-` };
+}
+
+// `upgrade` and `weaken` are the same shape and take the same keys.
+const OVERRIDE_KEYS = ["size", "requirement", "bonusDieFace", "effect"];
+
+// The placeholder treatment a weakened card's colors get, worked out here independently of
+// render.js's dullColor(): saturation to 45%, lightness down 6, hue held.
+function dulled(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  const s = d === 0 ? 0 : d / (l > 0.5 ? 2 - max - min : max + min);
+  const h =
+    d === 0
+      ? 0
+      : (max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4) / 6;
+  const [sat, lum] = [s * 0.45, Math.max(0, l - 0.06)];
+  const q = lum < 0.5 ? lum * (1 + sat) : lum + sat - lum * sat;
+  const p = 2 * lum - q;
+  const channel = (t) => {
+    t = (t + 1) % 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const hex2 = (v) => Math.round(v * 255).toString(16).padStart(2, "0");
+  if (sat === 0) return `#${hex2(lum).repeat(3)}`;
+  return `#${hex2(channel(h + 1 / 3))}${hex2(channel(h))}${hex2(channel(h - 1 / 3))}`;
+}
 
 module.exports = {
   pageUrl,
@@ -52,5 +87,7 @@ module.exports = {
   pageEquipment,
   expectedEffectText,
   resolveUpgrade,
-  UPGRADE_KEYS,
+  resolveWeaken,
+  OVERRIDE_KEYS,
+  dulled,
 };

@@ -330,6 +330,24 @@ test.describe("ribbonColor", () => {
   });
 });
 
+test.describe("dullColor", () => {
+  test("cuts saturation and lightness, holding the hue", async ({ page }) => {
+    const result = await page.evaluate(() => ["#fd5e6c", "#8e324a", "#5da66f", "#7bc8ff"].map(dullColor));
+    expect(result).toEqual(["#c9747b", "#623f48", "#63816b", "#89b4d2"]);
+  });
+
+  // Nothing to desaturate, so only the darkening applies.
+  test("darkens a grey without tinting it", async ({ page }) => {
+    const hex = await page.evaluate(() => dullColor("#7b7b7b"));
+    expect(hex).toBe("#6c6c6c");
+  });
+
+  test("bottoms out at black rather than wrapping", async ({ page }) => {
+    const hex = await page.evaluate(() => dullColor("#000000"));
+    expect(hex).toBe("#000000");
+  });
+});
+
 test.describe("resolveEquipment", () => {
   test("returns the entry untouched unless asked for the upgrade", async ({ page }) => {
     const same = await page.evaluate(
@@ -368,6 +386,35 @@ test.describe("resolveEquipment", () => {
       return { name: upgraded.name, size: upgraded.size, die: upgraded.bonusDieFace };
     });
     expect(result).toEqual({ name: "Broadsword+", size: 2, die: 2 });
+  });
+
+  test("applies the weaken override and adds the -, leaving the entry alone", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const weakened = resolveEquipment("battleAxe", { weakened: true });
+      return {
+        name: weakened.name,
+        requirement: weakened.requirement,
+        baseName: EQUIPMENT.battleAxe.name,
+        baseRequirement: EQUIPMENT.battleAxe.requirement,
+        // Not overridden, so it comes through from the base entry.
+        size: weakened.size,
+      };
+    });
+    expect(result).toEqual({
+      name: "Battle Axe-",
+      requirement: { type: "max", value: 3 },
+      baseName: "Battle Axe",
+      baseRequirement: { type: "max", value: 4 },
+      size: 2,
+    });
+  });
+
+  test("an empty weaken override still yields a card, differing only by the -", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const weakened = resolveEquipment("mysteryBox", { weakened: true });
+      return { name: weakened.name, size: weakened.size, die: weakened.bonusDieFace };
+    });
+    expect(result).toEqual({ name: "Mystery Box-", size: 1, die: null });
   });
 });
 
@@ -425,5 +472,53 @@ test.describe("renderEquipmentCard upgraded", () => {
       title: "Battle Axe+",
       ribbonColor: "#c08a2e",
     });
+  });
+});
+
+test.describe("renderEquipmentCard weakened", () => {
+  // The weakened card's whole treatment is the "-" and the drained colors: no ribbon, since that is
+  // upgrade art, and no shape change, since nothing on the wiki weakens a card's size.
+  test("carries the -, the drained colors and no ribbon", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const read = (card) => ({
+        ribbons: card.querySelectorAll(".upgrade-ribbon").length,
+        weakened: card.classList.contains("equipment-card--weakened"),
+        title: card.querySelector(".equipment-card__header").textContent,
+        accent: card.style.getPropertyValue("--card-accent"),
+        body: card.style.getPropertyValue("--card-body"),
+        size2: card.classList.contains("equipment-card--size-2"),
+      });
+      return {
+        base: read(renderEquipmentCard("battleAxe")),
+        weakened: read(renderEquipmentCard("battleAxe", { weakened: true })),
+      };
+    });
+    expect(result.base).toEqual({
+      ribbons: 0,
+      weakened: false,
+      title: "Battle Axe",
+      accent: "#cdb94b",
+      body: "#9f7226",
+      size2: true,
+    });
+    expect(result.weakened).toEqual({
+      ribbons: 0,
+      weakened: true,
+      title: "Battle Axe-",
+      accent: "#9c935d",
+      body: "#6a593c",
+      size2: true,
+    });
+  });
+
+  // A countdown box has its own sampled fill, which has to be drained with the rest or the card
+  // ends up with one fully saturated square on it.
+  test("drains a countdown card's slot color too", async ({ page }) => {
+    const result = await page.evaluate(() => ({
+      base: renderEquipmentCard("plasmaCannon").style.getPropertyValue("--card-slot"),
+      weakened: renderEquipmentCard("plasmaCannon", { weakened: true }).style.getPropertyValue("--card-slot"),
+    }));
+    expect(result.weakened).not.toBe(result.base);
+    expect(result.weakened).toBe(await page.evaluate((hex) => dullColor(hex), result.base));
   });
 });

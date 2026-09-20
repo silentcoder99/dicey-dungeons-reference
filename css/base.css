@@ -26,6 +26,14 @@ h1, h2 {
   padding: 1.25rem 1rem 3rem;
 }
 
+/* An equipment page carries three cards side by side rather than a column of prose. 58rem is what
+   three of them plus the arrow and the divider need in order to each land on the same 260px
+   .upgrade-pair__side max-width the pair used when there were two -- so the cards keep the size
+   their snapshots were taken at. Set from renderEquipmentPage(), not in the 200 page stubs. */
+.page--wide {
+  max-width: 58rem;
+}
+
 /* ---------- Enemy header ---------- */
 .enemy-header {
   text-align: center;
@@ -258,7 +266,9 @@ h1, h2 {
   margin-bottom: 1.5rem;
 }
 
-/* The regular card, an arrow, then the upgraded one, as the game's own art presents an upgrade. */
+/* The regular card, an arrow, then the upgraded one, as the game's own art presents an upgrade --
+   then, past a divider, the weakened one, which follows from the regular card rather than from the
+   upgraded one and so gets no arrow of its own. */
 .upgrade-pair {
   display: flex;
   /* Top-aligned, so the two headings line up even when an upgrade changes the card's size and the
@@ -301,6 +311,18 @@ h1, h2 {
   opacity: 0.45;
 }
 
+/* 2px, not 1px, and the width is load-bearing: with `justify-content: center` the row's leftover
+   space is halved, so an odd total would put every card on a half-pixel and shift each one's
+   snapshot by a pixel without anything about the card having changed. The fixed parts have to sum
+   even -- three 260px columns, four 1rem gaps, the 1.75rem arrow, and this. */
+.upgrade-pair__divider {
+  flex: none;
+  align-self: stretch;
+  width: 2px;
+  background: currentColor;
+  opacity: 0.2;
+}
+
 .upgrade-pair__note {
   text-align: center;
   margin: 1.5rem 0 0;
@@ -314,9 +336,9 @@ h1, h2 {
   font-style: normal;
 }
 
-/* Two cards plus the arrow stop fitting side by side well below the .page cap, so stack them and
-   turn the arrow to match. */
-@media (max-width: 32rem) {
+/* Three cards plus the arrow stop fitting side by side as soon as the viewport drops under the
+   .page--wide cap, so stack them and turn the arrow to match. */
+@media (max-width: 58rem) {
   /* Stacked, the flex axes swap: the sides are sized across the column by `align-items` and down
      it by `flex`, so both need resetting or the sides collapse to their content. */
   .upgrade-pair {
@@ -332,6 +354,14 @@ h1, h2 {
   .upgrade-pair__arrow {
     transform: rotate(90deg);
     margin: 0.25rem 0;
+  }
+
+  /* A 1px column rule turns into a hairline across the stack; give it the width instead. */
+  .upgrade-pair__divider {
+    align-self: auto;
+    width: 60%;
+    height: 1px;
+    margin: 1.25rem 0 0.25rem;
   }
 }
 

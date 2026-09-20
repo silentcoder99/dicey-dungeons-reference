@@ -171,16 +171,20 @@ function renderEffectTokens(tokens) {
   return frag;
 }
 
-// ---------- Upgraded equipment ----------
+// ---------- Upgraded and weakened equipment ----------
 
-// An upgraded card is the base entry with its `upgrade` override applied and a "+" on the name.
-// Only the fields an upgrade actually changes are listed in `upgrade` (see data.js), so an empty
-// override still yields a valid upgraded card -- one that differs from the base only by the "+"
-// and the ribbon.
-function resolveEquipment(equipmentId, { upgraded = false } = {}) {
+// An upgraded card is the base entry with its `upgrade` override applied and a "+" on the name; a
+// weakened one is the same idea mirrored, with `weaken` and a "-". Only the fields the override
+// actually changes are listed (see data.js), so an empty override still yields a valid card -- one
+// that differs from the base only by the suffix and the card's treatment.
+//
+// `upgraded` and `weakened` are mutually exclusive: weakening an already-upgraded card is a state
+// the game has but this site doesn't model (see data.js on Dire Wolf Howl).
+function resolveEquipment(equipmentId, { upgraded = false, weakened = false } = {}) {
   const base = EQUIPMENT[equipmentId];
-  if (!upgraded) return base;
-  return { ...base, ...base.upgrade, name: `${base.name}+` };
+  if (upgraded) return { ...base, ...base.upgrade, name: `${base.name}+` };
+  if (weakened) return { ...base, ...base.weaken, name: `${base.name}-` };
+  return base;
 }
 
 // The art draws the upgrade ribbon in the card's own body color, one shade lighter: hue and
@@ -192,6 +196,21 @@ const RIBBON_LIGHTEN_PERCENT = 8;
 function ribbonColor(bodyHex) {
   const [h, s, l] = rgbToHsl(bodyHex);
   return hslToHex(h, s, Math.min(100, l + RIBBON_LIGHTEN_PERCENT));
+}
+
+// Placeholder treatment for a weakened card. Unlike the upgrade ribbon there is no reference art
+// for one -- art-references/ covers upgrades only, and the wiki has a single image per equipment --
+// so rather than invent a banner, the card is drawn in its own colors drained: saturation cut to
+// 45%, lightness down 6, hue held. Applied to all three of the card's colors, which is enough,
+// because the hatching, die-face and countdown box are all mixed from them in CSS.
+// Anchors: #fd5e6c -> #c9747b, #8e324a -> #623f48, #5da66f -> #63816b, #7bc8ff -> #89b4d2.
+// Replace this wholesale if real weakened-card art turns up.
+const WEAKENED_SATURATION_SCALE = 0.45;
+const WEAKENED_DARKEN_PERCENT = 6;
+
+function dullColor(hex) {
+  const [h, s, l] = rgbToHsl(hex);
+  return hslToHex(h, s * WEAKENED_SATURATION_SCALE, Math.max(0, l - WEAKENED_DARKEN_PERCENT));
 }
 
 function rgbToHsl(hex) {
@@ -269,20 +288,25 @@ function createUpgradeRibbon() {
   return svg;
 }
 
-function renderEquipmentCard(equipmentId, { upgraded = false } = {}) {
-  const data = resolveEquipment(equipmentId, { upgraded });
+function renderEquipmentCard(equipmentId, { upgraded = false, weakened = false } = {}) {
+  const data = resolveEquipment(equipmentId, { upgraded, weakened });
+  // A weakened card is the same card in drained colors (see dullColor); nothing else about it
+  // changes, so every color it uses goes through the same transform here.
+  const tint = weakened ? dullColor : (hex) => hex;
 
   const card = document.createElement("article");
   card.className = `equipment-card equipment-card--size-${data.size}`;
   if ([].concat(data.requirement).some(hasCaption)) card.classList.add("equipment-card--captioned");
-  card.style.setProperty("--card-accent", data.color.header);
-  card.style.setProperty("--card-body", data.color.body);
-  card.style.setProperty("--card-ribbon", ribbonColor(data.color.body));
-  if (data.color.slot) card.style.setProperty("--card-slot", data.color.slot);
+  card.style.setProperty("--card-accent", tint(data.color.header));
+  card.style.setProperty("--card-body", tint(data.color.body));
+  card.style.setProperty("--card-ribbon", ribbonColor(tint(data.color.body)));
+  if (data.color.slot) card.style.setProperty("--card-slot", tint(data.color.slot));
   if (upgraded) {
     card.classList.add("equipment-card--upgraded");
     card.appendChild(createUpgradeRibbon());
   }
+  // No ribbon: the ribbon is upgrade art, and a weakened card has none of its own yet.
+  if (weakened) card.classList.add("equipment-card--weakened");
 
   const header = document.createElement("header");
   header.className = "equipment-card__header";
@@ -476,8 +500,10 @@ function renderEnemyPicker() {
 // ---------- Equipment reference pages ----------
 
 // A card's upgrade is worth showing even when it changes nothing visible, but two identical cards
-// read as a bug, so say so.
+// read as a bug, so say so. Same for a weakened card -- the wiki lists no weakened form at all for
+// a few entries (Mystery Box), which is not the same as nobody having authored one.
 const NO_VISIBLE_UPGRADE_NOTE = "Upgrading doesn't change this card.";
+const NO_VISIBLE_WEAKEN_NOTE = "Weakening doesn't change this card.";
 
 function createPageNote(text, modifier) {
   const note = document.createElement("p");
@@ -497,14 +523,23 @@ function createUpgradeArrow() {
   return svg;
 }
 
-function createUpgradePairSide(heading, equipmentId, { upgraded }) {
+function createUpgradePairSide(heading, equipmentId, { upgraded = false, weakened = false } = {}) {
   const side = document.createElement("div");
   side.className = "upgrade-pair__side";
   const title = document.createElement("h2");
   title.className = "upgrade-pair__heading";
   title.textContent = heading;
-  side.append(title, renderEquipmentCard(equipmentId, { upgraded }));
+  side.append(title, renderEquipmentCard(equipmentId, { upgraded, weakened }));
   return side;
+}
+
+// The weakened card is not downstream of the upgraded one, so an arrow into it would be a lie. A
+// plain rule separates it instead: regular and upgraded are a progression, weakened is an aside.
+function createPairDivider() {
+  const divider = document.createElement("span");
+  divider.className = "upgrade-pair__divider";
+  divider.setAttribute("aria-hidden", "true");
+  return divider;
 }
 
 function renderEquipmentPage(equipmentId) {
@@ -518,12 +553,17 @@ function renderEquipmentPage(equipmentId) {
   name.textContent = equipment.name;
   root.appendChild(name);
 
+  // Three cards plus the arrow need more room than the 40rem a text page gets.
+  root.classList.add("page--wide");
+
   const pair = document.createElement("div");
   pair.className = "upgrade-pair";
   pair.append(
-    createUpgradePairSide("Regular", equipmentId, { upgraded: false }),
+    createUpgradePairSide("Regular", equipmentId),
     createUpgradeArrow(),
-    createUpgradePairSide("Upgraded", equipmentId, { upgraded: true })
+    createUpgradePairSide("Upgraded", equipmentId, { upgraded: true }),
+    createPairDivider(),
+    createUpgradePairSide("Weakened", equipmentId, { weakened: true })
   );
   root.appendChild(pair);
 
@@ -533,6 +573,10 @@ function renderEquipmentPage(equipmentId) {
 
   if (Object.keys(equipment.upgrade).length === 0) {
     root.appendChild(createPageNote(NO_VISIBLE_UPGRADE_NOTE));
+  }
+
+  if (Object.keys(equipment.weaken).length === 0) {
+    root.appendChild(createPageNote(NO_VISIBLE_WEAKEN_NOTE));
   }
 
   fitCardTitles(root);

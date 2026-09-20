@@ -86,6 +86,17 @@
   top: 48%;
 }
 
+/* Four sockets that each print a "NEEDS N" caption (Ice Age-). No card art has this -- Four Handed
+   Sword, the only 4-socket image the wiki has, captions nothing -- so these two numbers are derived
+   rather than measured. A caption is 5.7cqw tall and hangs 0.8cqw under its socket, which the 4.9cqw
+   row gap above does not clear, so the top row's captions land on the bottom row's sockets; 7cqw
+   clears them. That makes the block 2.1cqw taller, which would in turn push the bottom row's
+   captions into the effect text, so the block also rides 3% higher up the card. */
+.equipment-card--captioned .equipment-card__slots--grid {
+  row-gap: 7cqw;
+  top: 45%;
+}
+
 .equipment-card__effect {
   position: absolute;
   left: 3cqw;

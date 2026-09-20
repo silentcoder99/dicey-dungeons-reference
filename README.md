@@ -7,8 +7,8 @@ two questions:
   **mid-combat**: its name, dice count, max HP, any innate effects, and its equipment (name, color,
   size, dice requirements, effect, and initial state — the last of these is expressed through a
   `countdown` requirement, see below, rather than a separate field).
-- **If I buy this, what does it upgrade into?** For a given piece of equipment, its regular card and
-  its upgraded card side by side.
+- **If I buy this, what does it upgrade into?** For a given piece of equipment, its regular card,
+  its upgraded card and its weakened card side by side.
 
 Covers base-game ("Normal" difficulty) content only.
 
@@ -40,8 +40,8 @@ browser and checks both content/structure and visual appearance — see "Tests" 
 - `equipment.html` — the equipment search: a live-filtered list of every entry in `EQUIPMENT`,
   matched on a case-insensitive substring of the name. The project's only interactive control.
 - `equipment/<equipmentId>.html` — one page per piece of equipment, showing its regular card and
-  its upgraded card side by side. The filename is the equipment's key in `EQUIPMENT`
-  (e.g. `equipment/battleAxe.html`).
+  its upgraded card and its weakened card side by side. The filename is the equipment's key in
+  `EQUIPMENT` (e.g. `equipment/battleAxe.html`).
 
 Equipment the player can only get by stealing from an enemy is listed like everything else —
 several classes can steal, so every card in `EQUIPMENT` is one a player may end up holding. Most
@@ -97,10 +97,11 @@ The image is at `https://wiki.diceydungeons.com/lib/exe/fetch.php?media=equipmen
 where `<file>` is the image name in the equipment page's raw text (usually the page id, but not
 always — Small Shield's is `smallshield.png`).
 
-**Upgrade data is the one place the card image can't settle it.** The wiki has no upgraded card
-image — only one image per equipment — so an `upgrade` override is derived from the
-`Upgraded Effect` / `Upgraded Requirements` / `Upgraded Size` rows of the equipment's raw page
-instead. Three things to watch:
+**Upgrade and weaken data are the one place the card image can't settle it.** The wiki has no
+upgraded or weakened card image — only one image per equipment, the regular card — so an `upgrade`
+override is derived from the `Upgraded Effect` / `Upgraded Requirements` / `Upgraded Size` rows of
+the equipment's raw page instead, and a `weaken` override from the `Weakened Effect` /
+`Weakened Requirements` rows. Three things to watch:
 
 - Apply the wiki row's **delta** to the base card's existing tokens rather than transcribing the
   wiki's prose, which words things differently (Campfire's card reads `fire 1 dmg, burn a dice`
@@ -111,7 +112,19 @@ instead. Three things to watch:
   Broadsword's base card already does.
 - Some pages carry a **second stats table** for the enemy/Jester version of the card (Battle Axe,
   Electromagnet, Hammer, Sneeze, Spike). This site's equipment pages are about what the player buys,
-  so the first table is the one that counts.
+  so the first table is the one that counts. Sneeze and Spike are the two whose tables actually
+  disagree about a weakened row.
+
+Three more that apply to `weaken` only:
+
+- Two pages label the row `Downgraded effect` rather than `Weakened Effect` (Whip, Lament). Same
+  thing.
+- **Dire Wolf Howl**'s rows are qualified: `Weakened Effect (if upgraded)` describes weakening an
+  already-upgraded card, a state the game has but this site doesn't model, so only its
+  `Weakened Requirements (if not upgraded)` row applies.
+- **Mystery Box** is the one entry with no weakened row at all, which is why it carries
+  `weaken: {}`. Nothing anywhere has a `Weakened Size` row, so a weakened card is never a different
+  shape — `tests/data.spec.js` holds that line.
 
 Effect text is limited to **two lines**: a third overflows the body panel on a size-2 card, which
 `tests/equipment-page.spec.js` will catch.
@@ -175,6 +188,9 @@ Effect text is limited to **two lines**: a third overflows the body panel on a s
      entry: only the fields that actually change, and `{}` if the upgrade changes nothing the card
      shows. Allowed keys are `size`, `requirement`, `bonusDieFace` and `effect`; the "+" on the name
      and the ribbon are the renderer's job, and the colors never change. See "Upgraded cards".
+   - `weaken` — the same thing mirrored, for the game's reverse of an upgrade: same shape, same
+     allowed keys, same `{}`, and the "-" on the name and the drained colors are likewise the
+     renderer's job. See "Weakened cards".
    - If the equipment uses an icon not yet in `ICON_SYMBOLS` in `js/icons.js` (currently
      `sword`, `shield`, `armor`, `fire`, `poison`, `weaken`, `thorns`, `shock`, `ice`,
      `heal`, `drain`, `blind`, `lock`, `gold`, `vanish`, `confuse`, `dice`), add a hand-drawn 24×24 symbol
@@ -204,6 +220,10 @@ Effect text is limited to **two lines**: a third overflows the body panel on a s
    Battle Axe and Snowball (both in `EQUIPMENT` and both covered by `art-references/`) beside their
    screenshots at the same width. Those two between them exercise a size change, an added die-face
    and an extra effect line.
+8. For a weakened card there is no image *and* no rule to check against — the wiki's row is the only
+   reference there is. Read the card's text and sockets back against that row, and check the card
+   still fits (a weakened effect is usually shorter than the base's, but not always: Blight and
+   Rotten Core both grow from one line to two).
 
 ## Card geometry
 
@@ -227,6 +247,11 @@ wiki card images and averaged across cards (they agree to within a percent or so
 - Text sizes come from the art's cap heights (title 6.4%, effect lines ~7.6%, MIN/MAX label
   4.4% over a 6.9% value, EVEN/ODD 4.7%, countdown number 14%, NEEDS caption 4.1%), converted with
   the site font's ~0.72 cap-height ratio.
+- Four sockets stack 2x2 (Flamethrower+, Ice Age-). Where all four are *captioned* the art has no
+  example at all — Four Handed Sword, the wiki's only 4-socket image, captions nothing — so that
+  case is derived: a caption is 5.7% of card width tall and hangs 0.8% under its socket, which the
+  measured 4.9% row gap doesn't clear, so a captioned grid uses a 7% row gap and rides 3% higher up
+  the card to keep the bottom row's captions off the effect text.
 - Captioned sockets ("NEEDS N", "NEEDS DOUBLES"): on size-1 cards the socket moves up to
   **40.5%** of card height with the caption right under it; size-2 cards keep the usual
   positions, with a small gap above the caption. Pips in a "Require N" socket are grey
@@ -241,10 +266,11 @@ own line breaks.
 
 ## Upgraded cards
 
-An `equipment/<id>.html` page draws the card twice: once from the entry, once with its `upgrade`
-override applied. The upgraded one gets a `+` on its title and wears the game's ribbon banner. Its
-shape comes from the resolved `size`, so an upgrade that shrinks the equipment (Battle Axe, Hammer,
-Electromagnet) renders a size-1 card beside a size-2 one.
+An `equipment/<id>.html` page draws the card three times: once from the entry, once with its
+`upgrade` override applied and once with its `weaken` (see "Weakened cards"). The upgraded one gets
+a `+` on its title and wears the game's ribbon banner. Its shape comes from the resolved `size`, so
+an upgrade that shrinks the equipment (Battle Axe, Hammer, Electromagnet) renders a size-1 card
+beside a size-2 one.
 
 The ribbon was traced from the four screenshots in `art-references/` — a gold, a red, a green and
 a blue card, which is what settled the colour rule. Unlike `.wiki-cache/`, that directory is
@@ -274,6 +300,42 @@ Two more deliberate differences from the art: the card clips the ~1.6% of the ri
 overhangs its top edge (`.equipment-card` has `overflow: hidden`, which the card's rounded corners
 and the content-fit tests both depend on), and the ribbon's colour follows `js/data.js`'s
 wiki-sampled body colour, which for some cards is not the colour an in-game screenshot shows.
+
+## Weakened cards
+
+A weakened card is the upgrade mirrored: the entry with its `weaken` override applied and a `-` on
+its title, in the third column of an `equipment/<id>.html` page. It follows from the *regular* card
+rather than from the upgraded one, so there is no arrow into it — a divider separates it instead.
+
+**Its look is a placeholder, and deliberately so.** There is no reference art for a weakened card
+anywhere: `art-references/` covers upgrades only, and the wiki has a single image per equipment.
+Rather than invent a banner the way the ribbon could be traced, the card is drawn in its own
+colours drained — saturation cut to 45%, lightness down 6, hue held (`dullColor()` in
+`js/render.js`, applied to `--card-accent`, `--card-body` and `--card-slot` at the one point
+`renderEquipmentCard()` sets them). Anchors: `#fd5e6c` → `#c9747b`, `#8e324a` → `#623f48`,
+`#5da66f` → `#63816b`, `#7bc8ff` → `#89b4d2`.
+
+Draining those three is enough for the whole card, because everything else is mixed from them in
+CSS: the hatching is accent over body, the die-face is 75% white over body, and a countdown box
+falls back to body when the card has no sampled `slot` colour.
+
+When real weakened-card art does turn up, `dullColor()` is what it replaces. The card already
+carries an `equipment-card--weakened` class for the art to hang off — no stylesheet rule matches it
+yet, on purpose — and the data and the page layout stay as they are.
+
+Two consequences of it being a placeholder:
+
+- **No pixel snapshots.** `visual.spec.js` covers every card in its regular and upgraded forms but
+  not its weakened one, since a baseline would lock in a picture that is meant to be replaced.
+  Weakened cards are covered by the DOM and geometry tests in `equipment-page.spec.js` instead.
+- **No ribbon.** The ribbon is upgrade art; a weakened card wearing one would be inventing a
+  meaning the game doesn't give it.
+
+Layout: three cards plus the arrow need more room than the 40rem a text page gets, so
+`renderEquipmentPage()` adds `page--wide` (58rem) to `#equipment-root` — set from the renderer
+rather than in the 200 hand-written page stubs. At 58rem each column still lands on the same 260px
+`.upgrade-pair__side` max-width the pair used when there were two of them, so the cards keep the
+size their snapshots were taken at; below that the row stacks.
 
 ## Die-slot vs. die-face
 
@@ -338,21 +400,27 @@ tests read enemy/equipment data from the same source as the pages instead of a c
   clearing restores everything. Round-trips a handful of representative links rather than every
   one, which would dominate the suite's runtime — the full link list is asserted separately.
 - **`equipment-page.spec.js`** — the equipment counterpart of `page.spec.js`. For *every* entry in
-  `EQUIPMENT`: both cards render with no console errors or external requests, the regular one matches
-  the entry and the upgraded one matches the entry with its `upgrade` applied (name, effect text,
-  its size's aspect ratio), only the upgraded card has the ribbon, and both cards' content fits the
-  same way the enemy pages' does. Then that every entry with a `note` prints it under the pair and
-  nowhere on either card, and the upgrades that change a card's layout — Battle Axe's size,
-  Snowball's die-face, Ice Age's sockets, Tower Shield's dropped requirement.
+  `EQUIPMENT`: all three cards render with no console errors or external requests, the regular one
+  matches the entry, the upgraded one matches the entry with its `upgrade` applied and the weakened
+  one with its `weaken` (name, effect text, its size's aspect ratio), only the upgraded card has the
+  ribbon, only the weakened one has the drained colours, and every card's content fits the same way
+  the enemy pages' does — including each "NEEDS N" caption, which is positioned absolutely and so
+  sits outside the slot box the other measurements use. Then that every entry with a `note` prints
+  it under the row and
+  nowhere on any card, the upgrades that change a card's layout — Battle Axe's size,
+  Snowball's die-face, Ice Age's sockets, Tower Shield's dropped requirement — and the weakenings
+  that do — Ice Age's four sockets, Spanner's, and Mystery Box's "changes nothing" note.
 - **`data.spec.js`** — checks `js/data.js`, `enemies/` and `equipment/` in Node: levels, equipment
   references (but not the reverse — most of what a player buys is on no enemy page), every icon
   and requirement type drawable in
-  **both** a card's forms, every entry carrying an `upgrade` override whose keys are ones the card
-  shows and which never restates a value the base already has, one page per enemy calling
+  **all** of a card's forms, every entry carrying `upgrade` and `weaken` overrides whose keys are
+  ones the card shows and which never restate a value the base already has (plus: no `weaken`
+  changes a card's size), one page per enemy calling
   `renderEnemyPage` and one per equipment calling `renderEquipmentPage` with its own id, and every
   enemy page linking back to `enemies.html`. Also runs once.
 - **`visual.spec.js`** — pixel snapshot tests (`toHaveScreenshot`) of **every equipment card** in
-  both forms: the regular one from the enemy page that carries it, or from its own equipment page
+  its regular and upgraded forms (not its weakened one, whose look is a placeholder — see
+  "Weakened cards"): the regular one from the enemy page that carries it, or from its own equipment page
   when no enemy carries it (`<kebab-case id>-card.png`), and the upgraded one from its equipment
   page (`<kebab-case id>-card-upgraded.png`). Plus full pages
   (Frog, Magician, Hothead, Keymaster, Scathach, the picker, the home page, the search page filtered
@@ -370,14 +438,20 @@ intentionally alters appearance, review the diff Playwright reports, then regene
 with:
 
 ```bash
-npx playwright test --update-snapshots=all
+npm run test:update-snapshots
 ```
 
-Use `=all`, not the bare `npm run test:update-snapshots`. The plain flag only rewrites a baseline
-whose test *failed*, so any change small enough to pass under the 2% pixel threshold — two more
-rows in a long list, say — leaves a stale baseline behind, and later changes are then compared
-against the wrong picture. With `=all` every baseline is rewritten, and the ones that come back
-changed in `git status` are exactly the ones that really moved.
+That rewrites only the baselines whose test actually failed, which is what you want: a card's
+rendering depends on where it sits on the page, not just on the card, so a layout change elsewhere
+shifts the anti-aliasing along its die-slot borders by a few pixels without the card itself moving
+at all. Adding a third card to the equipment pages did exactly that to every card drawn on one —
+tens of pixels out of ~52,000, two orders of magnitude under the 2% threshold, and identical
+geometry to four decimal places. Rewriting every baseline would have churned 280 images and buried
+the handful that really changed, so those were deliberately left alone.
+
+The cost of the plain flag is that a real change small enough to pass under the threshold leaves a
+stale baseline behind. Prefer a tight close-up over re-baselining everything when you need to pin
+down something that small — that is what the existing component-level snapshots are for.
 
 Snapshot filenames encode the OS they were generated on (currently `linux`). Regenerating them on
 a different platform will produce differently-named baselines rather than overwrite the existing

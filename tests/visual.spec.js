@@ -7,7 +7,9 @@
 // threshold; a tight crop on just that element does not have that problem.
 //
 // Every equipment card has its own snapshot, generated from js/data.js, so a card can't drift
-// after being checked by eye against its wiki card image (see README).
+// after being checked by eye against its wiki card image (see README). Weakened cards are the one
+// exception: their look is an explicit placeholder with no reference art behind it, so a baseline
+// would only lock in a picture that is meant to be replaced (see README, "Weakened cards").
 const { test, expect } = require("@playwright/test");
 const { pageUrl, EQUIPMENT, EQUIPMENT_IDS, ENEMIES, pageEquipment } = require("./helpers");
 
@@ -22,7 +24,7 @@ test.describe("Every equipment card", () => {
   for (const equipmentId of EQUIPMENT_IDS) {
     // Snapshot the card where it first appears (an enemy may carry several copies). Most of what a
     // player buys is carried by no enemy at all, so those fall back to the regular card on their
-    // own equipment page -- the first card there, the upgraded one being second.
+    // own equipment page -- the first card there, then the upgraded one, then the weakened one.
     const enemyId = Object.keys(ENEMIES).find((id) => pageEquipment(ENEMIES[id]).includes(equipmentId));
     const file = enemyId ? `enemies/${enemyId}.html` : `equipment/${equipmentId}.html`;
     const index = enemyId ? pageEquipment(ENEMIES[enemyId]).indexOf(equipmentId) : 0;
