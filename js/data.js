@@ -3085,6 +3085,353 @@ const EQUIPMENT = {
       ],
     },
   },
+
+  // ---------- Thief, episode 1 ----------
+
+  backstab: {
+    name: "Backstab",
+    color: { header: "#7b7b7b", body: "#444a59" },
+    size: 1,
+    requirement: { type: "exact", value: 3 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword", value: 0 },
+      { type: "text", text: " dmg. Add " },
+      { type: "icon", icon: "sword", value: 1 },
+      { type: "lineBreak" },
+      { type: "text", text: "on each item use." },
+    ],
+    upgrade: {
+      requirement: { type: "odd" },
+    },
+  },
+  bandage: {
+    name: "Bandage",
+    color: { header: "#5da66f", body: "#2a6f4d" },
+    size: 1,
+    requirement: { type: "odd" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Heal " },
+      { type: "icon", icon: "heal", value: 1 },
+      { type: "text", text: " health" },
+      { type: "lineBreak" },
+      { type: "text", text: "(Reuseable)", muted: true },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  blender: {
+    name: "Blender",
+    color: { header: "#5da66f", body: "#2a6e3a" },
+    size: 2,
+    requirement: { type: "min", value: 2 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Split a dice into 1s" },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Split a dice into 1s," },
+        { type: "lineBreak" },
+        { type: "text", text: "and roll an extra 1" },
+      ],
+    },
+  },
+  catastrophe: {
+    name: "Catastrophe",
+    color: { header: "#cdb94b", body: "#9e6c29", slot: "#c0882f" },
+    size: 1,
+    requirement: { type: "countdown", value: 7 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Inflict " },
+      { type: "icon", icon: "shock" },
+      { type: "text", text: " shock," },
+      { type: "lineBreak" },
+      { type: "icon", icon: "fire" },
+      { type: "text", text: " burn, and " },
+      { type: "icon", icon: "ice" },
+      { type: "text", text: " freeze" },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "shock", value: 2 },
+        { type: "text", text: " shock," },
+        { type: "lineBreak" },
+        { type: "icon", icon: "fire", value: 2 },
+        { type: "text", text: " burn, " },
+        { type: "icon", icon: "ice", value: 2 },
+        { type: "text", text: " freeze" },
+      ],
+    },
+  },
+  counterfeit: {
+    name: "Counterfeit",
+    color: { header: "#5da66f", body: "#2a6730" },
+    size: 2,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Duplicate a dice" },
+    ],
+    upgrade: {
+      size: 1,
+    },
+  },
+  crowbar: {
+    name: "Crowbar",
+    color: { header: "#5da66f", body: "#457853" },
+    size: 1,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Reduce the countdowns" },
+      { type: "lineBreak" },
+      { type: "text", text: "on all equipment by " },
+      { type: "dieSlot" },
+    ],
+    // The upgrade adds a second use, and the note needs a line of its own -- so the first line
+    // drops to the wiki's shorter wording, minus the "by" that still would not fit.
+    upgrade: {
+      effect: [
+        { type: "text", text: "Reduce countdowns " },
+        { type: "dieSlot" },
+        { type: "lineBreak" },
+        { type: "text", text: "(2 uses this turn)", muted: true },
+      ],
+    },
+  },
+  detonator: {
+    name: "Detonator",
+    color: { header: "#b496ec", body: "#74529f" },
+    size: 1,
+    requirement: { type: "even" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword", value: 1 },
+      { type: "text", text: " damage for" },
+      { type: "lineBreak" },
+      { type: "text", text: "every " },
+      { type: "icon", icon: "poison", value: 1 },
+      { type: "text", text: " on enemy" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  dodge: {
+    name: "Dodge",
+    color: { header: "#ff9048", body: "#bd5c2a", slot: "#c56125" },
+    size: 1,
+    requirement: { type: "countdown", value: 16 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Dodge next attack" },
+    ],
+    upgrade: {
+      requirement: { type: "countdown", value: 12 },
+    },
+  },
+  glassCauldron: {
+    name: "Glass Cauldron",
+    color: { header: "#7bc8ff", body: "#2f6277" },
+    size: 1,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Freeze " },
+      { type: "icon", icon: "ice", value: 1 },
+      { type: "text", text: " dice," },
+      { type: "lineBreak" },
+      { type: "text", text: "roll a one" },
+    ],
+    // The upgrade adds a second use on its own line, leaving one line for the rest: "one" has to
+    // become "1" for it to fit.
+    upgrade: {
+      effect: [
+        { type: "text", text: "Freeze " },
+        { type: "icon", icon: "ice", value: 1 },
+        { type: "text", text: " dice, roll a 1" },
+        { type: "lineBreak" },
+        { type: "text", text: "(2 uses this turn)", muted: true },
+      ],
+    },
+  },
+  hacksaw: {
+    name: "Hacksaw",
+    color: { header: "#5da66f", body: "#3a6e34" },
+    size: 1,
+    requirement: { type: "min", value: 3 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Split a dice in three" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  hookshot: {
+    name: "Hookshot",
+    color: { header: "#5da66f", body: "#386739" },
+    size: 1,
+    requirement: { type: "exact", value: 2 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Next equipment has" },
+      { type: "lineBreak" },
+      { type: "text", text: "+1 use this turn" },
+    ],
+    upgrade: {
+      requirement: { type: "even" },
+    },
+  },
+  ironArmor: {
+    name: "Iron Armor",
+    color: { header: "#ff9048", body: "#9b5524" },
+    size: 1,
+    requirement: { type: "exact", value: 5 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Reduce " },
+      { type: "icon", icon: "armor", value: 2 },
+      { type: "text", text: " damage" },
+      { type: "lineBreak" },
+      { type: "text", text: "from each attack" },
+    ],
+    upgrade: {
+      requirement: { type: "odd" },
+    },
+  },
+  lantern: {
+    name: "Lantern",
+    color: { header: "#cdb94b", body: "#a86d2c" },
+    size: 1,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Get 2x" },
+      { type: "dieSlot" },
+      { type: "text", text: "s next turn" },
+      { type: "lineBreak" },
+      { type: "text", text: "(once per battle)", muted: true },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Get 2x" },
+        { type: "dieSlot" },
+        { type: "text", text: "s next turn" },
+      ],
+    },
+  },
+  lastStand: {
+    name: "Last Stand",
+    color: { header: "#5da66f", body: "#2a6f4d", slot: "#2e7f40" },
+    size: 1,
+    requirement: { type: "countdown", value: 12 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Survive the next fatal" },
+      { type: "lineBreak" },
+      { type: "text", text: "blow (Doesn't stack)" },
+    ],
+    upgrade: {
+      requirement: { type: "countdown", value: 9 },
+    },
+  },
+  leatherArmor: {
+    name: "Leather Armor",
+    color: { header: "#ff9048", body: "#a64e21" },
+    size: 1,
+    requirement: { type: "odd" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Reduce " },
+      { type: "icon", icon: "armor", value: 1 },
+      { type: "text", text: " damage" },
+      { type: "lineBreak" },
+      { type: "text", text: "from each attack" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  lockpick: {
+    name: "Lockpick",
+    color: { header: "#5da66f", body: "#388455" },
+    size: 1,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Split a dice in two" },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Split a dice in two" },
+        { type: "lineBreak" },
+        { type: "text", text: "On six, split in three" },
+      ],
+    },
+  },
+  nudgeblade: {
+    name: "Nudgeblade",
+    color: { header: "#fd5e6c", body: "#902d32" },
+    size: 2,
+    requirement: { type: "min", value: 2 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword" },
+      { type: "dieSlot" },
+      { type: "text", text: " damage, get" },
+      { type: "lineBreak" },
+      { type: "text", text: "new dice (value -1)" },
+    ],
+    upgrade: {
+      size: 1,
+    },
+  },
+  poisonNeedle: {
+    name: "Poison Needle",
+    color: { header: "#b496ec", body: "#684a83" },
+    size: 1,
+    requirement: { type: "max", value: 2 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Inflict " },
+      { type: "icon", icon: "poison", value: 1 },
+      { type: "text", text: " poison" },
+      { type: "lineBreak" },
+      { type: "text", text: "(3 uses this turn)", muted: true },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Inflict " },
+        { type: "icon", icon: "poison", value: 1 },
+        { type: "text", text: " poison" },
+        { type: "lineBreak" },
+        { type: "text", text: "(5 uses this turn)", muted: true },
+      ],
+    },
+  },
+  skeletonKey: {
+    name: "Skeleton Key",
+    color: { header: "#5da66f", body: "#3a6f34" },
+    size: 1,
+    requirement: { type: "doubles" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Set all dice to " },
+      { type: "dieSlot" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
 };
 
 // Enemies in the wiki's enemy-list order: by level, then bosses. The picker page groups them the

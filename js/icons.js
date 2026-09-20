@@ -12,6 +12,14 @@ const ICON_SYMBOLS = {
   shield: `
     <path d="M12 2l7 3v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V5l7-3z"></path>
   `,
+  // Damage reduction, which the armor cards draw as a dome with a heart cut out of it and two
+  // blows glancing off the bottom -- not the plain shield of the shield cards.
+  armor: `
+    <path fill-rule="evenodd" d="M12 1.8c-5 0-9 4-9 9v7.4h18V10.8c0-5-4-9-9-9zm0 14.1c-3-2.8-4.6-4.3-4.6-6.1a2.55 2.55 0 0 1 4.6-1.5 2.55 2.55 0 0 1 4.6 1.5c0 1.8-1.6 3.3-4.6 6.1z"></path>
+    <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <path d="M2.4 20.3 6.6 22.6M21.6 20.3 17.4 22.6"></path>
+    </g>
+  `,
   fire: `
     <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round">
       <path d="M12 2c.8 3.6 3.4 5.6 5.2 8.1 1.2 1.7 2 3.4 2 5.5 0 3.9-3.2 6.9-7.2 6.9s-7.2-3-7.2-6.9c0-2.8 1.3-4.9 3.2-6.6.2 1.6.9 2.8 2 3.6C9.9 8.8 11 5.4 12 2z"></path>
