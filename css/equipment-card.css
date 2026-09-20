@@ -73,11 +73,17 @@
   gap: 9.4cqw;
 }
 
-/* Four sockets in one row would run 154.6cqw wide, past the card. The art (see Four Handed Sword)
-   stacks them 2x2 instead, at the same spacing, so cap the row at two sockets and let it wrap. */
+/* Four sockets in one row would run 154.6cqw wide, past the card, so the art stacks them 2x2
+   instead -- and draws them a little smaller and closer than a one-row card does. Measured off
+   Four Handed Sword, the only 4-socket card the wiki has an image of: sockets 29.8cqw, 10.1cqw
+   apart across and 4.9cqw down, the block centred at 48% of card height rather than 50.5%. */
 .equipment-card__slots--grid {
   flex-wrap: wrap;
-  max-width: 72.6cqw;
+  /* An explicit width, not a max: an absolutely positioned box placed at left 50% shrink-to-fits
+     against the half-card that is left of it, which would wrap the sockets one per row. */
+  width: 69.7cqw;
+  gap: 4.9cqw 10.1cqw;
+  top: 48%;
 }
 
 .equipment-card__effect {
@@ -148,6 +154,13 @@
 .equipment-card__slots .die-slot,
 .equipment-card__slots > .die-face {
   --slot-size: 31.6cqw;
+}
+
+/* A 2x2 block draws its sockets slightly smaller, as the art does. Declared after the rule above
+   so it wins: both selectors weigh the same. */
+.equipment-card__slots--grid .die-slot,
+.equipment-card__slots--grid > .die-face {
+  --slot-size: 29.8cqw;
 }
 
 .equipment-card__slots .die-slot {

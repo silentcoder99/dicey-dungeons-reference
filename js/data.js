@@ -3676,6 +3676,137 @@ const EQUIPMENT = {
       ],
     },
   },
+
+  // ---------- Inventor, episode 1 ----------
+
+  buzzer: {
+    name: "Buzzer",
+    color: { header: "#cdb94b", body: "#956c2a" },
+    size: 1,
+    requirement: { type: "even" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Inflict " },
+      { type: "icon", icon: "shock", value: 1 },
+      { type: "text", text: " shock" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  crossbow: {
+    name: "Crossbow",
+    color: { header: "#fd5e6c", body: "#8b2e34", slot: "#ac2c38" },
+    size: 2,
+    requirement: { type: "countdown", value: 12 },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Do " },
+      { type: "icon", icon: "sword", value: 9 },
+      { type: "text", text: " damage" },
+    ],
+    upgrade: {
+      requirement: { type: "countdown", value: 9 },
+    },
+  },
+  flamethrower: {
+    name: "Flamethrower",
+    color: { header: "#fd5e6c", body: "#83232e" },
+    size: 1,
+    requirement: [null, null],
+    bonusDieFace: null,
+    effect: [
+      { type: "icon", icon: "fire" },
+      { type: "dieSlot" },
+      { type: "text", text: " dmg, +" },
+      { type: "icon", icon: "fire", value: 2 },
+      { type: "text", text: " burn" },
+      { type: "lineBreak" },
+      { type: "text", text: "(once per battle)", muted: true },
+    ],
+    // Four sockets, which the art stacks 2x2 rather than running across the card.
+    upgrade: {
+      size: 2,
+      requirement: [null, null, null, null],
+      effect: [
+        { type: "icon", icon: "fire" },
+        { type: "dieSlot" },
+        { type: "text", text: " dmg, +" },
+        { type: "icon", icon: "fire", value: 4 },
+        { type: "text", text: " burn" },
+        { type: "lineBreak" },
+        { type: "text", text: "(once per battle)", muted: true },
+      ],
+    },
+  },
+  scrapMetal: {
+    name: "Scrap Metal",
+    color: { header: "#7b7b7b", body: "#595f5f" },
+    size: 1,
+    requirement: null,
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Gain " },
+      { type: "icon", icon: "shield", value: 1 },
+      { type: "text", text: " shield" },
+      { type: "lineBreak" },
+      { type: "text", text: "(Always offered as scrap)", muted: true },
+    ],
+    upgrade: {
+      effect: [
+        { type: "text", text: "Gain " },
+        { type: "icon", icon: "shield", value: 2 },
+        { type: "text", text: " shield" },
+        { type: "lineBreak" },
+        { type: "text", text: "(Always offered as scrap)", muted: true },
+      ],
+    },
+  },
+  snowflake: {
+    name: "Snowflake",
+    color: { header: "#7bc8ff", body: "#276076" },
+    size: 1,
+    requirement: { type: "odd" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Freeze " },
+      { type: "icon", icon: "ice", value: 1 },
+      { type: "text", text: " dice" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  spark: {
+    name: "Spark",
+    color: { header: "#fd5e6c", body: "#882d33" },
+    size: 1,
+    requirement: { type: "even" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Burns " },
+      { type: "icon", icon: "fire", value: 1 },
+      { type: "text", text: " dice" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
+  whisper: {
+    name: "Whisper",
+    color: { header: "#ff9048", body: "#974c22" },
+    size: 1,
+    requirement: { type: "odd" },
+    bonusDieFace: null,
+    effect: [
+      { type: "text", text: "Weaken " },
+      { type: "icon", icon: "weaken", value: 1 },
+      { type: "text", text: " equipment" },
+    ],
+    upgrade: {
+      requirement: null,
+    },
+  },
 };
 
 // Enemies in the wiki's enemy-list order: by level, then bosses. The picker page groups them the
