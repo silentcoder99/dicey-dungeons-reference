@@ -19,13 +19,16 @@ async function open(page, file) {
 const kebabCase = (id) => id.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
 test.describe("Every equipment card", () => {
-  for (const equipmentId of Object.keys(EQUIPMENT)) {
-    // Snapshot the card where it first appears (an enemy may carry several copies).
+  for (const equipmentId of EQUIPMENT_IDS) {
+    // Snapshot the card where it first appears (an enemy may carry several copies). Most of what a
+    // player buys is carried by no enemy at all, so those fall back to the regular card on their
+    // own equipment page -- the first card there, the upgraded one being second.
     const enemyId = Object.keys(ENEMIES).find((id) => pageEquipment(ENEMIES[id]).includes(equipmentId));
-    const index = pageEquipment(ENEMIES[enemyId]).indexOf(equipmentId);
+    const file = enemyId ? `enemies/${enemyId}.html` : `equipment/${equipmentId}.html`;
+    const index = enemyId ? pageEquipment(ENEMIES[enemyId]).indexOf(equipmentId) : 0;
 
     test(`${EQUIPMENT[equipmentId].name} card`, async ({ page }) => {
-      await open(page, `enemies/${enemyId}.html`);
+      await open(page, file);
       await expect(page.locator(".equipment-card").nth(index)).toHaveScreenshot(
         `${kebabCase(equipmentId)}-card.png`
       );

@@ -308,6 +308,12 @@ h1, h2 {
   font-style: italic;
 }
 
+/* A condition the card can't show is part of what the page is answering, not an aside about it. */
+.upgrade-pair__note--condition {
+  opacity: 0.85;
+  font-style: normal;
+}
+
 /* Two cards plus the arrow stop fitting side by side well below the .page cap, so stack them and
    turn the arrow to match. */
 @media (max-width: 32rem) {

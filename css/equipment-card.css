@@ -69,7 +69,15 @@
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 9.4cqw;
+}
+
+/* Four sockets in one row would run 154.6cqw wide, past the card. The art (see Four Handed Sword)
+   stacks them 2x2 instead, at the same spacing, so cap the row at two sockets and let it wrap. */
+.equipment-card__slots--grid {
+  flex-wrap: wrap;
+  max-width: 72.6cqw;
 }
 
 .equipment-card__effect {

@@ -294,6 +294,9 @@ function renderEquipmentCard(equipmentId, { upgraded = false } = {}) {
 
   const slots = document.createElement("div");
   slots.className = "equipment-card__slots";
+  // More than two sockets don't fit a single row at the art's size and spacing; the art stacks
+  // them two per row (Flamethrower+ takes four dice).
+  if ([].concat(data.requirement).length > 2) slots.classList.add("equipment-card__slots--grid");
   slots.append(...createRequirementSlots(data.requirement));
   if (data.bonusDieFace) {
     slots.appendChild(createDieFace(data.bonusDieFace));
@@ -476,6 +479,13 @@ function renderEnemyPicker() {
 // read as a bug, so say so.
 const NO_VISIBLE_UPGRADE_NOTE = "Upgrading doesn't change this card.";
 
+function createPageNote(text, modifier) {
+  const note = document.createElement("p");
+  note.className = modifier ? `upgrade-pair__note upgrade-pair__note--${modifier}` : "upgrade-pair__note";
+  note.textContent = text;
+  return note;
+}
+
 function createUpgradeArrow() {
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("class", "upgrade-pair__arrow");
@@ -517,11 +527,12 @@ function renderEquipmentPage(equipmentId) {
   );
   root.appendChild(pair);
 
+  // Some cards print a condition outside the card frame -- a spellbook cast cost, an activation
+  // panel -- which the card itself has nowhere to show. `note` carries it (see data.js).
+  if (equipment.note) root.appendChild(createPageNote(equipment.note, "condition"));
+
   if (Object.keys(equipment.upgrade).length === 0) {
-    const note = document.createElement("p");
-    note.className = "upgrade-pair__note";
-    note.textContent = NO_VISIBLE_UPGRADE_NOTE;
-    root.appendChild(note);
+    root.appendChild(createPageNote(NO_VISIBLE_UPGRADE_NOTE));
   }
 
   fitCardTitles(root);

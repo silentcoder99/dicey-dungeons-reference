@@ -27,6 +27,10 @@
 //   { type: "dieSlot" }            -> a mini empty die-slot standing in for "the placed die's value"
 //   { type: "lineBreak" }          -> a line break the card itself has
 //
+// Equipment `note` (optional): one line of prose shown under the pair on the equipment's own page,
+// for a condition the card image prints outside the card frame and the card itself therefore has
+// nowhere to show -- a Witch spell's spellbook cast cost, Short Circuit's activation panel.
+//
 // Equipment `upgrade`: what changes when the player upgrades this equipment, as a partial override
 // merged over the entry above -- only the fields that actually change are listed, and `{}` means
 // the upgrade changes nothing the card shows. Allowed keys are `size`, `requirement`,

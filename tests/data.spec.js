@@ -1,5 +1,6 @@
-// Consistency checks on js/data.js and the enemy pages that other tests rely on but don't check
-// themselves (e.g. visual.spec.js assumes every equipment entry appears on some enemy page).
+// Consistency checks on js/data.js and the enemy/equipment pages that other tests rely on but
+// don't check themselves (e.g. equipment/*.html has to exist for every entry, since that is where
+// visual.spec.js snapshots any card no enemy carries).
 const fs = require("fs");
 const path = require("path");
 const { test, expect } = require("@playwright/test");
@@ -24,15 +25,14 @@ test("every enemy has a level from 1 to 5, or is a boss", () => {
   }
 });
 
-test("every equipment id an enemy page shows exists, and every equipment entry is shown", () => {
-  const shown = new Set();
+// Not the reverse: most of what a player buys is carried by no enemy at all, so an entry no enemy
+// page shows is normal. Each one still has to have its own equipment page -- asserted below.
+test("every equipment id an enemy page shows exists", () => {
   for (const id of ENEMY_IDS) {
     for (const equipmentId of pageEquipment(ENEMIES[id])) {
       expect(EQUIPMENT[equipmentId], `${id} references ${equipmentId}`).toBeDefined();
-      shown.add(equipmentId);
     }
   }
-  expect(Object.keys(EQUIPMENT).filter((id) => !shown.has(id))).toEqual([]);
 });
 
 // Both forms of every card, since an upgrade can change the requirement or the effect (and so can
