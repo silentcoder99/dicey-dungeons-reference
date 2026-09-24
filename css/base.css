@@ -123,6 +123,63 @@ h1, h2 {
   align-items: flex-start;
 }
 
+/* Each card on an enemy page is a link to that equipment's page. The card has to look untouched at
+   rest -- every card snapshot is cropped from one of these grids, so a pixel that moves there is a
+   regression, not this feature -- so the link adds no box of its own. It takes over the flex basis
+   and cap the card used as a grid item (the same re-host as `.upgrade-pair .equipment-card` below)
+   and contributes nothing but interaction states. Same two numbers as `.equipment-card`, so the
+   flex line solves identically and the card's outer width -- and with it every cqw inside it --
+   is unchanged. */
+.equipment-card-link {
+  flex: 1 1 220px;
+  max-width: 260px;
+  display: block;
+  color: inherit;
+  /* Not cosmetic: the UA underline would propagate to the card's title band. */
+  text-decoration: none;
+  /* Matches .equipment-card's radius (css/equipment-card.css) so the focus ring follows the card's
+     corners -- retune one and the other has to follow. */
+  border-radius: 14px;
+  cursor: pointer;
+  /* No grey flash over the whole card on tap; the :active press below is the feedback. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Sized by the link now, not by a flex basis of its own (see `.upgrade-pair .equipment-card`). The
+   card keeps its own flex declarations, which are simply inert on a non-flex-item. */
+.equipment-card-link .equipment-card {
+  width: 100%;
+  max-width: none;
+  transition: transform 90ms ease-out, filter 90ms ease-out;
+}
+
+/* The ring is on the link, outside the card's own `overflow: hidden`, so nothing clips it, and the
+   grid's 1.25rem gap clears the 3px offset plus 3px width. */
+.equipment-card-link:focus-visible {
+  outline: 3px solid #a58bd0;
+  outline-offset: 3px;
+}
+
+/* Pointer devices only: on a touch screen :hover sticks to whichever card was tapped last, and
+   this site is mobile-first. */
+@media (hover: hover) and (pointer: fine) {
+  .equipment-card-link:hover .equipment-card {
+    filter: brightness(1.06);
+  }
+}
+
+/* The card presses inside the ring rather than taking the ring with it, so keyboard Enter reads as
+   a press without the focus indicator jumping. */
+.equipment-card-link:active .equipment-card {
+  transform: scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .equipment-card-link .equipment-card {
+    transition: none;
+  }
+}
+
 /* ---------- Navigation ---------- */
 .back-link {
   display: inline-block;

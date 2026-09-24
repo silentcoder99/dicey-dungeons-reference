@@ -124,6 +124,55 @@ test.describe("Every enemy page", () => {
         expect(card.slots.bottom, `${label} slots overlap effect text`).toBeLessThanOrEqual(card.text.top);
       }
     });
+
+    // Each card is a link to its equipment page. The link wraps the card rather than replacing it,
+    // and takes over the flex basis the card had as a grid item, so the card's box must come out
+    // exactly as it did unwrapped -- every card snapshot is cropped from one of these grids.
+    test(`${enemy.name}: every card links to its equipment page`, async ({ page }) => {
+      await openEnemyPage(page, enemyId);
+
+      const links = page.locator(".equipment-card-link");
+      await expect(links).toHaveCount(cardIds.length);
+
+      // Page order, duplicates included: Slime carries two Slime Balls, and 17 other enemies
+      // repeat a card. The path is built here rather than in helpers.js so the expectation stays
+      // independent of render.js, the way PICKER_GROUPS and resolveUpgrade are.
+      const hrefs = await links.evaluateAll((els) => els.map((el) => el.getAttribute("href")));
+      expect(hrefs).toEqual(cardIds.map((id) => `../equipment/${id}.html`));
+
+      const labels = await links.evaluateAll((els) => els.map((el) => el.getAttribute("aria-label")));
+      expect(labels).toEqual(cardIds.map((id) => EQUIPMENT[id].name));
+
+      const boxes = await page.evaluate(() =>
+        [...document.querySelectorAll(".equipment-card")].map((card) => {
+          const link = card.parentElement;
+          const c = card.getBoundingClientRect();
+          const l = link.getBoundingClientRect();
+          return {
+            wrapped: link.matches("a.equipment-card-link"),
+            dx: l.x - c.x,
+            dy: l.y - c.y,
+            dw: l.width - c.width,
+            dh: l.height - c.height,
+            width: c.width,
+          };
+        })
+      );
+
+      for (const [i, equipmentId] of cardIds.entries()) {
+        const label = `${EQUIPMENT[equipmentId].name} card`;
+        const box = boxes[i];
+        expect(box.wrapped, `${label} is wrapped in a link`).toBe(true);
+        for (const edge of ["dx", "dy", "dw", "dh"]) {
+          expect(box[edge], `${label} box moved (${edge}) inside its link`).toBe(0);
+        }
+        // The canary behind the claim above: at this project's viewport every card is clamped to
+        // its own max-width, so the flex line has spare room and no item's width depends on how
+        // many share its row. Change .page's max-width, the grid gap or the viewport and this
+        // fails -- that is the point; check the reasoning still holds before updating the number.
+        expect(box.width, `${label} is not at its max-width`).toBe(260);
+      }
+    });
   }
 });
 
@@ -262,5 +311,70 @@ test.describe("Space Marine page", () => {
     await expect(slot).toHaveCSS("border-top-style", "solid");
     await expect(slot).toHaveCSS("border-top-color", "rgb(253, 94, 108)");
     await expect(slot).toHaveCSS("background-color", "rgb(172, 44, 56)");
+  });
+});
+
+test.describe("Card links", () => {
+  // Keymaster is the enemy with a second, headed section, so this covers both the main Equipment
+  // grid and an extraEquipment one.
+  test("Keymaster: a card in each section opens that equipment's page", async ({ page }) => {
+    for (const equipmentId of ["lock1", "keyblade"]) {
+      await openEnemyPage(page, "keymaster");
+      await page.locator(`.equipment-card-link[href="../equipment/${equipmentId}.html"]`).first().click();
+      await expect(page).toHaveURL(pageUrl(`equipment/${equipmentId}.html`));
+      await expect(page.locator(".equipment-page__name")).toHaveText(EQUIPMENT[equipmentId].name);
+      // Arriving from an enemy doesn't change where the back-link goes; the browser's Back button
+      // is the way back to the enemy.
+      await expect(page.locator("a.back-link")).toHaveAttribute("href", "../equipment.html");
+
+      await page.goBack();
+      // goBack may restore from the bfcache without re-running DOMContentLoaded, so wait on the
+      // rendered link rather than assuming a fresh render.
+      await page.waitForSelector(".equipment-card-link");
+      await expect(page).toHaveURL(pageUrl("enemies/keymaster.html"));
+    }
+  });
+
+  test("Slime: both copies of a repeated card link to the same page", async ({ page }) => {
+    await openEnemyPage(page, "slime");
+    const links = page.locator(".equipment-card-link");
+    await expect(links).toHaveCount(2);
+    await links.nth(1).click();
+    await expect(page).toHaveURL(pageUrl("equipment/slimeBall.html"));
+    await expect(page.locator(".equipment-page__name")).toHaveText(EQUIPMENT.slimeBall.name);
+  });
+
+  test("Frog: a card link is reachable by keyboard, rings on focus, and opens on Enter", async ({
+    page,
+  }) => {
+    await openEnemyPage(page, "frog");
+
+    // Real Tab presses, not locator.focus(): :focus-visible only matches when the focus came from
+    // a keyboard-ish modality.
+    await page.locator("a.back-link").focus();
+    await page.keyboard.press("Tab");
+
+    const first = page.locator(".equipment-card-link").first();
+    await expect(first).toBeFocused();
+    expect(
+      await first.evaluate((el) => ({
+        focusVisible: el.matches(":focus-visible"),
+        width: getComputedStyle(el).outlineWidth,
+        style: getComputedStyle(el).outlineStyle,
+      }))
+    ).toEqual({ focusVisible: true, width: "3px", style: "solid" });
+
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(pageUrl("equipment/broadsword.html"));
+  });
+
+  // The cards are meant to look untouched until someone interacts with a keyboard: a ring left
+  // behind by a tap or a click would be a visible change to a card at rest.
+  test("Frog: a card clicked with the mouse gets no focus ring", async ({ page }) => {
+    await openEnemyPage(page, "frog");
+    const first = page.locator(".equipment-card-link").first();
+    await first.evaluate((el) => el.addEventListener("click", (e) => e.preventDefault()));
+    await first.click();
+    expect(await first.evaluate((el) => el.matches(":focus-visible"))).toBe(false);
   });
 });

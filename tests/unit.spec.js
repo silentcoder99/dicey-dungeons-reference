@@ -294,6 +294,42 @@ test.describe("renderEquipmentCard: captioned requirements", () => {
   });
 });
 
+test.describe("createEquipmentCardLink", () => {
+  test("wraps the card in a link to its equipment page, one directory up", async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const link = createEquipmentCardLink("smallShield");
+      return {
+        tagName: link.tagName,
+        className: link.className,
+        href: link.getAttribute("href"),
+        ariaLabel: link.getAttribute("aria-label"),
+        childCount: link.children.length,
+        childIsCard: link.firstElementChild.classList.contains("equipment-card"),
+      };
+    });
+    expect(result).toEqual({
+      tagName: "A",
+      className: "equipment-card-link",
+      href: "../equipment/smallShield.html",
+      // The card's own text would otherwise be the link's whole accessible name.
+      ariaLabel: "Small Shield",
+      childCount: 1,
+      childIsCard: true,
+    });
+  });
+
+  // The wrapper exists so the card doesn't have to change. If anyone ever "just adds a class" to a
+  // linked card, every snapshot taken from an enemy page is suspect -- this catches it first.
+  test("the card inside is the plain regular card, unchanged", async ({ page }) => {
+    const identical = await page.evaluate(
+      () =>
+        createEquipmentCardLink("broadsword").firstElementChild.outerHTML ===
+        renderEquipmentCard("broadsword").outerHTML
+    );
+    expect(identical).toBe(true);
+  });
+});
+
 test.describe("injectIconSprite", () => {
   test("adds one hidden sprite with a symbol per icon, even if called again", async ({ page }) => {
     const result = await page.evaluate(() => {

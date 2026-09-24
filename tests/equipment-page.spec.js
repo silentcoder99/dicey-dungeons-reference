@@ -92,6 +92,9 @@ test.describe("Every equipment page", () => {
       await expect(page.locator(".equipment-page__name")).toHaveText(base.name);
       await expect(page.locator(".back-link")).toHaveAttribute("href", "../equipment.html");
 
+      // A card here would link to the page it is already on, so only enemy-page cards are links.
+      await expect(page.locator(".equipment-card-link")).toHaveCount(0);
+
       const sides = page.locator(".upgrade-pair__side");
       await expect(sides).toHaveCount(3);
       await expect(sides.nth(0).locator(".upgrade-pair__heading")).toHaveText("Regular");
@@ -254,5 +257,19 @@ test.describe("Upgrades that change the card's shape or sockets", () => {
     await expect(slot(0)).toHaveClass(/die-slot--max/);
     await expect(slot(1)).not.toHaveClass(/die-slot--max/);
     await expect(slot(1)).toBeEmpty();
+  });
+});
+
+test.describe("Cards here are not links", () => {
+  // The per-entry loop above counts .equipment-card-link; this catches a wrapper added under some
+  // other class, and pins the page down to its one link, the back-link.
+  test("no card on an equipment page sits inside an anchor", async ({ page }) => {
+    await page.goto(pageUrl("equipment/broadsword.html"));
+    await page.waitForSelector(".equipment-card");
+    const inLink = await page.evaluate(
+      () => [...document.querySelectorAll(".equipment-card")].filter((c) => c.closest("a")).length
+    );
+    expect(inLink).toBe(0);
+    await expect(page.locator("#equipment-root a")).toHaveCount(1);
   });
 });

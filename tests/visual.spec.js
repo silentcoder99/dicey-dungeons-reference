@@ -10,6 +10,9 @@
 // after being checked by eye against its wiki card image (see README). Weakened cards are the one
 // exception: their look is an explicit placeholder with no reference art behind it, so a baseline
 // would only lock in a picture that is meant to be replaced (see README, "Weakened cards").
+//
+// Nothing here moves the mouse, and that matters now that an enemy page's cards are links: adding
+// a .hover() or .click() before a toHaveScreenshot would bake a hover state into a baseline.
 const { test, expect } = require("@playwright/test");
 const { pageUrl, EQUIPMENT, EQUIPMENT_IDS, ENEMIES, pageEquipment } = require("./helpers");
 

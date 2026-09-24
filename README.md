@@ -36,12 +36,18 @@ browser and checks both content/structure and visual appearance — see "Tests" 
   between groups. Each enemy page has a back-link to it.
 - `enemies/<enemyId>.html` — one page per enemy. The filename is the enemy's key in `ENEMIES`
   (e.g. `enemies/spaceMarine.html`). Covers every enemy and boss on the wiki's enemy list except
-  Jester and Lady Luck.
+  Jester and Lady Luck. Every card on the page is a link to that equipment's page. The card itself
+  is unchanged at rest — the link adds a pointer cursor, a focus ring and a press response, nothing
+  that shows until you interact — so the card snapshots still measure the card and nothing else,
+  and anything that moves in them is a regression rather than this feature.
 - `equipment.html` — the equipment search: a live-filtered list of every entry in `EQUIPMENT`,
   matched on a case-insensitive substring of the name. The project's only interactive control.
 - `equipment/<equipmentId>.html` — one page per piece of equipment, showing its regular card and
   its upgraded card and its weakened card side by side. The filename is the equipment's key in
-  `EQUIPMENT` (e.g. `equipment/battleAxe.html`).
+  `EQUIPMENT` (e.g. `equipment/battleAxe.html`). Reached from the equipment search or from any card
+  on an enemy page. Its own three cards are not links — a card here would point at the page it is
+  already on — and its back-link goes to the search from wherever you arrived; the browser's Back
+  button is what returns you to an enemy.
 
 Equipment the player can only get by stealing from an enemy is listed like everything else —
 several classes can steal, so every card in `EQUIPMENT` is one a player may end up holding. Most
@@ -229,7 +235,10 @@ Effect text is limited to **two lines**: a third overflows the body panel on a s
 
 Cards are a proportional replica of the wiki's card art. Everything inside a card is sized in
 `cqw` (percent of the card's width — the card is a CSS size container), so the card keeps the
-art's proportions at any width. The numbers in `css/equipment-card.css` were measured from the
+art's proportions at any width. That makes the card's *outer* width load-bearing: anything that
+re-hosts a card in a new layout context has to hand it the same width it had before, which is what
+`.upgrade-pair .equipment-card` and `.equipment-card-link .equipment-card` in `css/base.css` are
+for. The numbers in `css/equipment-card.css` were measured from the
 wiki card images and averaged across cards (they agree to within a percent or so):
 
 - Shape: width ÷ height is **1.316** for size-1 cards and **0.882** for size-2 cards.
@@ -379,7 +388,8 @@ Seven spec files, all under `tests/`. `tests/helpers.js` loads `js/data.js` in N
 tests read enemy/equipment data from the same source as the pages instead of a copied list.
 
 - **`unit.spec.js`** — calls the pure DOM-building functions from `js/render.js` directly (e.g.
-  `createDieSlot`, `createDieFace`, `renderEffectTokens`) via `page.evaluate` and asserts on the
+  `createDieSlot`, `createDieFace`, `renderEffectTokens`, `createEquipmentCardLink`) via
+  `page.evaluate` and asserts on the
   DOM they produce. Fastest, most targeted; runs once (`functional` project).
 - **`page.spec.js`** — loads the real enemy pages. For *every* enemy in `ENEMIES`: stats, innate
   effects, card names and effect text match the data, the back-link exists, there are no console
@@ -389,7 +399,12 @@ tests read enemy/equipment data from the same source as the pages instead of a c
   otherwise fail silently). Deeper checks of slot/die-face/icon composition for Frog, Magician,
   Hothead and Space Marine, which between them use the original die-slot styles; the newer
   captioned, doubles and multi-socket styles are covered by `unit.spec.js` and the card
-  snapshots. Also runs once.
+  snapshots. Then, per enemy, that every card is wrapped in a link to its equipment page in page
+  order (duplicates included — Slime carries two Slime Balls), each link's box identical to its
+  card's to the pixel, since the link only took over the flex basis the card had as a grid item.
+  Plus a `Card links` group: clicking a card in each of Keymaster's two sections and returning with
+  the browser's Back button, both copies of Slime's repeated card, Tab and Enter with the focus
+  ring, and no ring left behind by a mouse click. Also runs once.
 - **`picker-page.spec.js`** — loads `enemies.html`: one headed section per level then Bosses, in
   order and split by dividers, each with the right links in data order; every enemy linked exactly
   once; clicking each link then its back-link round-trips. Also runs once.
@@ -409,7 +424,8 @@ tests read enemy/equipment data from the same source as the pages instead of a c
   it under the row and
   nowhere on any card, the upgrades that change a card's layout — Battle Axe's size,
   Snowball's die-face, Ice Age's sockets, Tower Shield's dropped requirement — and the weakenings
-  that do — Ice Age's four sockets, Spanner's, and Mystery Box's "changes nothing" note.
+  that do — Ice Age's four sockets, Spanner's, and Mystery Box's "changes nothing" note. Also that
+  no card here is a link: a card on an equipment page would point at the page it is already on.
 - **`data.spec.js`** — checks `js/data.js`, `enemies/` and `equipment/` in Node: levels, equipment
   references (but not the reverse — most of what a player buys is on no enemy page), every icon
   and requirement type drawable in
@@ -422,7 +438,9 @@ tests read enemy/equipment data from the same source as the pages instead of a c
   its regular and upgraded forms (not its weakened one, whose look is a placeholder — see
   "Weakened cards"): the regular one from the enemy page that carries it, or from its own equipment page
   when no enemy carries it (`<kebab-case id>-card.png`), and the upgraded one from its equipment
-  page (`<kebab-case id>-card-upgraded.png`). Plus full pages
+  page (`<kebab-case id>-card-upgraded.png`). The cards taken from an enemy page now sit inside
+  links, which is expected to make no difference to them — a diff here is the check on that.
+  Plus full pages
   (Frog, Magician, Hothead, Keymaster, Scathach, the picker, the home page, the search page filtered
   and unfiltered, and the Battle Axe and Snowball equipment pages), a close-up of the upgrade ribbon,
   and close-ups (the die-face pips, the header's dice

@@ -386,6 +386,24 @@ function renderEnemyHeader(enemy) {
   return header;
 }
 
+// Tapping a card on an enemy page opens that equipment's own page. The link wraps the card here
+// rather than renderEquipmentCard building one, because the same function draws the three cards on
+// an equipment page, where a link would point at the page it is already on.
+//
+// Links are relative to an enemy page, which sits one directory below the root (renderEnemyPicker
+// and renderEquipmentSearch build the root-relative form).
+function createEquipmentCardLink(equipmentId) {
+  const link = document.createElement("a");
+  link.className = "equipment-card-link";
+  link.href = `../equipment/${equipmentId}.html`;
+  // Without this the link's accessible name is everything the card says -- its title, every socket
+  // label and the whole effect line. The name is the card's visible label and the thing a player is
+  // picking between, so it names the link; the rest stays readable as the link's contents.
+  link.setAttribute("aria-label", EQUIPMENT[equipmentId].name);
+  link.appendChild(renderEquipmentCard(equipmentId));
+  return link;
+}
+
 function renderEnemyPage(enemyId) {
   const enemy = ENEMIES[enemyId];
   const root = document.getElementById("enemy-root");
@@ -418,7 +436,7 @@ function renderEnemyPage(enemyId) {
       const grid = document.createElement("div");
       grid.className = "equipment-grid";
       for (const equipmentId of group.equipment) {
-        grid.appendChild(renderEquipmentCard(equipmentId));
+        grid.appendChild(createEquipmentCardLink(equipmentId));
       }
       section.appendChild(grid);
     }
